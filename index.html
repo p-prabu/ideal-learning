@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ideal Learning</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .hero {
+            background-color: #343a40;
+            color: white;
+            padding: 2rem 1rem; /* Reduced padding */
+            text-align: center;
+        }
+        .card {
+            margin-bottom: 1.5rem;
+            border: none;
+            border-radius: 15px; /* More rounded corners */
+            background: linear-gradient(to right, #ece9e6, #ffffff); /* Gradient background */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); /* Softer shadow */
+            transition: transform 0.3s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-10px);
+        }
+        .card-title {
+            font-weight: bold;
+        }
+        .card-icon {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #343a40;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Ideal Learning</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1 class="display-4">Welcome to Ideal Learning</h1>
+        <p class="lead">Interactive learning materials.</p>
+    </div>
+
+    <div class="container mt-5">
+        <h2>Topics</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="card-icon"><i class="fas fa-network-wired"></i></div>
+                        <h5 class="card-title text-center">Active Directory Replication</h5>
+                        <p class="card-text">A brief overview of Active Directory replication, the process by which changes to the directory are synchronized across domain controllers.</p>
+                        <a href="ad/adrep.html" class="btn btn-primary w-100">Go to lesson</a>
+                    </div>
+                </div>
+            </div>
+            <!-- Add more cards here for new topics -->
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
