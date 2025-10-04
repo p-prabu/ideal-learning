@@ -111,7 +111,7 @@
             <div id="content-container">
                 <!-- Content for Domain Controllers -->
                 <div id="dc" class="concept-card bg-white p-6 md:p-8 rounded-xl shadow-md">
-                    <h2 class="text-2xl md:text-3xl font-bold text-blue-600 mb-4">🧠 1. Domain Controllers (DCs)</h2>
+                    <h2 class="text-xl md:text-2xl font-bold text-blue-600 mb-4">🧠 1. Domain Controllers (DCs)</h2>
                     <p class="text-lg text-gray-600 mb-4">Think of each Domain Controller as a librarian in a giant library chain. Every DC stores a copy of the same book (the Active Directory database). When one librarian updates a book, the others must update their copies. That's replication.</p>
                     <div class="grid md:grid-cols-2 gap-6 mt-6">
                         <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
@@ -128,7 +128,7 @@
                 
                 <!-- Content for NTDS.DIT -->
                 <div id="ntds" class="concept-card bg-white p-8 rounded-xl shadow-md hidden">
-                    <h2 class="text-3xl font-bold text-purple-600 mb-4">📘 2. NTDS.DIT (Active Directory Database)</h2>
+                    <h2 class="text-xl md:text-2xl font-bold text-purple-600 mb-4">📘 2. NTDS.DIT (Active Directory Database)</h2>
                     <p class="text-lg text-gray-600 mb-4">Think of NTDS.DIT as the master book each librarian (Domain Controller) maintains. It is the physical database file for Active Directory.</p>
                     <div class="bg-purple-50 p-6 rounded-lg border border-purple-200 mt-6">
                         <h3 class="font-semibold text-xl text-purple-800 mb-2">What's Inside?</h3>
@@ -143,7 +143,7 @@
 
                 <!-- Content for USN -->
                 <div id="usn" class="concept-card bg-white p-8 rounded-xl shadow-md hidden">
-                    <h2 class="text-3xl font-bold text-teal-600 mb-4">🔢 3. USN (Update Sequence Number)</h2>
+                    <h2 class="text-xl md:text-2xl font-bold text-teal-600 mb-4">🔢 3. USN (Update Sequence Number)</h2>
                     <p class="text-lg text-gray-600 mb-4">Think of the USN as a serial number that only goes up. Every DC maintains its own USN counter. Every time an object is created, modified, or deleted on a DC, its local USN counter increases by 1.</p>
                     <div class="mt-6 p-6 bg-gray-50 rounded-lg border">
                         <h3 class="text-xl font-semibold text-gray-800 mb-4">Interactive Demo: How USN Works</h3>
@@ -157,7 +157,7 @@
 
                 <!-- Content for Replication Metadata -->
                 <div id="metadata" class="concept-card bg-white p-8 rounded-xl shadow-md hidden">
-                    <h2 class="text-3xl font-bold text-indigo-600 mb-4">🏷️ 4. Replication Metadata & Attribute Versioning</h2>
+                    <h2 class="text-xl md:text-2xl font-bold text-indigo-600 mb-4">🏷️ 4. Replication Metadata & Attribute Versioning</h2>
                     <p class="text-lg text-gray-600 mb-4">Every single attribute in Active Directory has a hidden "change log tag" attached to it. This metadata is crucial for resolving conflicts in a multi-master environment.</p>
                      <div class="bg-indigo-50 p-6 rounded-lg border border-indigo-200 mt-6">
                         <h3 class="font-semibold text-xl text-indigo-800 mb-3">Key Metadata Fields</h3>
@@ -168,7 +168,7 @@
 
                 <!-- Content for High-Watermark Vector -->
                 <div id="highwatermark" class="concept-card bg-white p-8 rounded-xl shadow-md hidden">
-                    <h2 class="text-3xl font-bold text-cyan-600 mb-4">📊 5. High-Watermark Vector Table</h2>
+                    <h2 class="text-xl md:text-2xl font-bold text-cyan-600 mb-4">📊 5. High-Watermark Vector Table</h2>
                     <p class="text-lg text-gray-600 mb-4">This is a table kept by a destination DC for each of its replication partners. It's like a bookmark, telling the DC: <strong class="font-semibold">"For this specific partner, I've already received all changes up to USN X."</strong></p>
                     <div class="mt-6 p-6 bg-cyan-50 rounded-lg border border-cyan-200">
                         <h3 class="text-xl font-semibold text-cyan-800 mb-4">Replication Example</h3>
@@ -179,7 +179,7 @@
 
                  <!-- Content for Up-To-Dateness Vector -->
                 <div id="utdvector" class="concept-card bg-white p-8 rounded-xl shadow-md hidden">
-                    <h2 class="text-3xl font-bold text-rose-600 mb-4">🕒 6. Up-To-Dateness Vector Table (UTD Vector)</h2>
+                    <h2 class="text-xl md:text-2xl font-bold text-rose-600 mb-4">🕒 6. Up-To-Dateness Vector Table (UTD Vector)</h2>
                     <p class="text-lg text-gray-600 mb-4">Where the High-Watermark is per-partner, the UTD Vector is global. It tracks the highest <strong class="font-semibold">originating USN</strong> a DC has seen from every other DC in the forest, regardless of which partner sent the change.</p>
                     <div class="mt-6 p-6 bg-rose-50 rounded-lg border border-rose-200">
                         <h3 class="text-xl font-semibold text-rose-800 mb-4">Preventing Duplicate Changes</h3>
@@ -191,7 +191,7 @@
                 
                  <!-- Content for Connection Objects -->
                 <div id="connection" class="concept-card bg-white p-8 rounded-xl shadow-md hidden">
-                    <h2 class="text-3xl font-bold text-amber-600 mb-4">🔗 7. Connection Objects</h2>
+                    <h2 class="text-xl md:text-2xl font-bold text-amber-600 mb-4">🔗 7. Connection Objects</h2>
                     <p class="text-lg text-gray-600 mb-4">A Connection Object is a one-way "link" in Active Directory that tells a Destination DC to pull replication changes from a specific Source DC. They are the building blocks of the replication topology.</p>
                     <div class="grid md:grid-cols-2 gap-6 mt-6">
                         <div class="bg-amber-50 p-6 rounded-lg border border-amber-200"><h3 class="font-semibold text-xl text-amber-800 mb-2">One-Way Street</h3><p class="text-gray-700">A connection from DC1 to DC2 allows DC2 to pull from DC1. For two-way sync, a second connection object (DC2 to DC1) is required.</p></div>
@@ -202,7 +202,7 @@
 
                 <!-- Content for KCC -->
                 <div id="kcc" class="concept-card bg-white p-8 rounded-xl shadow-md hidden">
-                    <h2 class="text-3xl font-bold text-lime-600 mb-4">🧠 8. KCC (Knowledge Consistency Checker)</h2>
+                    <h2 class="text-xl md:text-2xl font-bold text-lime-600 mb-4">🧠 8. KCC (Knowledge Consistency Checker)</h2>
                     <p class="text-lg text-gray-600 mb-4">The KCC is a built-in process that runs on every DC. Think of it as the network planner or air traffic controller for replication. Its primary job is to automatically create and maintain the replication topology by creating Connection Objects.</p>
                     <div class="bg-lime-50 p-6 rounded-lg border border-lime-200 mt-6">
                         <h3 class="font-semibold text-xl text-lime-800 mb-2">What does the KCC do?</h3>
@@ -213,17 +213,25 @@
                 
                 <!-- Content for Topology -->
                 <div id="topology" class="concept-card bg-white p-8 rounded-xl shadow-md hidden">
-                    <h2 class="text-3xl font-bold text-fuchsia-600 mb-4">🌐 9. Replication Topology: Intra-site vs. Inter-site</h2>
+                    <h2 class="text-xl md:text-2xl font-bold text-fuchsia-600 mb-4">🌐 9. Replication Topology: Intra-site vs. Inter-site</h2>
                     <p class="text-lg text-gray-600 mb-4">The rules for replication change depending on whether DCs are in the same physical location (site) or different ones. This is designed to be efficient over both fast LANs and slower WANs.</p>
                     <div class="grid md:grid-cols-2 gap-6 mt-6">
-                        <div class="bg-fuchsia-50 p-6 rounded-lg border border-fuchsia-200"><h3 class="font-semibold text-xl text-fuchsia-800 mb-2">🏠 Intra-site Replication</h3><p class="text-gray-700 mb-3">(Inside the same site)</p><ul class="list-disc list-inside space-y-2 text-gray-700"><li><strong>Trigger:</strong> Change notification (near real-time).</li><li><strong>Frequency:</strong> ~15 seconds.</li><li><strong>Compression:</strong> ❌ No (fast LAN assumed).</li><li><strong>Protocol:</strong> RPC over TCP.</li></ul></div>
-                        <div class="bg-blue-50 p-6 rounded-lg border border-blue-200"><h3 class="font-semibold text-xl text-blue-800 mb-2">🌍 Inter-site Replication</h3><p class="text-gray-700 mb-3">(Between different sites)</p><ul class="list-disc list-inside space-y-2 text-gray-700"><li><strong>Trigger:</strong> Runs on a schedule.</li><li><strong>Frequency:</strong> Default is 180 minutes (3 hours).</li><li><strong>Compression:</strong> ✅ Yes (to save WAN bandwidth).</li><li><strong>Protocol:</strong> RPC over TCP or SMTP.</li></ul></div>
+                        <div class="bg-fuchsia-50 p-6 rounded-lg border border-fuchsia-200"><h3 class="font-semibold text-xl text-fuchsia-800 mb-2">🏠 Intra-site Replication</h3><p class="text-gray-700 mb-3">(Inside the same site)</p><ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li><strong>Trigger:</strong> Change notification (near real-time).</li>
+                            <li><strong>Frequency:</strong> ~15 seconds.</li>
+                            <li><strong>Compression:</strong> ❌ No (fast LAN assumed).</li>
+                            <li><strong>Protocol:</strong> RPC over TCP.</li></ul></div>
+                        <div class="bg-blue-50 p-6 rounded-lg border border-blue-200"><h3 class="font-semibold text-xl text-blue-800 mb-2">🌍 Inter-site Replication</h3><p class="text-gray-700 mb-3">(Between different sites)</p><ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li><strong>Trigger:</strong> Runs on a schedule.</li>
+                            <li><strong>Frequency:</strong> Default is 180 minutes (3 hours).</li>
+                            <li><strong>Compression:</strong> ✅ Yes (to save WAN bandwidth).</li>
+                            <li><strong>Protocol:</strong> RPC over TCP or SMTP.</li></ul></div>
                     </div>
                 </div>
 
                 <!-- Content for Queues -->
                 <div id="queues" class="concept-card bg-white p-8 rounded-xl shadow-md hidden">
-                    <h2 class="text-3xl font-bold text-orange-600 mb-4">📥 10. Replication Queues</h2>
+                    <h2 class="text-xl md:text-2xl font-bold text-orange-600 mb-4">📥 10. Replication Queues</h2>
                     <p class="text-lg text-gray-600 mb-4">When a change occurs, it doesn't get sent immediately. It's first placed in an outbound queue for each replication partner. This ensures reliability even if a partner is temporarily offline.</p>
                     <div class="mt-6 p-6 bg-orange-50 rounded-lg border border-orange-200">
                         <h3 class="text-xl font-semibold text-orange-800 mb-4">How it works</h3>
@@ -234,7 +242,7 @@
                 
                 <!-- Content for Triggers -->
                 <div id="triggers" class="concept-card bg-white p-8 rounded-xl shadow-md hidden">
-                    <h2 class="text-3xl font-bold text-sky-600 mb-4">⏱️ 11. Replication Triggers</h2>
+                    <h2 class="text-xl md:text-2xl font-bold text-sky-600 mb-4">⏱️ 11. Replication Triggers</h2>
                     <p class="text-lg text-gray-600 mb-4">Replication doesn't run constantly. It's triggered by specific events and rules.</p>
                      <div class="mt-6 space-y-4">
                         <div class="p-4 bg-sky-50 rounded-lg border border-sky-200"><h3 class="font-semibold text-lg text-sky-800">Change Notification (Intra-site)</h3><p class="text-gray-700">When a change is made, the DC waits about 15 seconds and then notifies its partners within the same site to come and get the update. This is why intra-site replication is so fast.</p></div>
@@ -245,7 +253,7 @@
 
                 <!-- Content for Tools -->
                 <div id="tools" class="concept-card bg-white p-8 rounded-xl shadow-md hidden">
-                    <h2 class="text-3xl font-bold text-red-600 mb-4">🛠️ 12. Monitoring Replication: Tools</h2>
+                    <h2 class="text-xl md:text-2xl font-bold text-red-600 mb-4">🛠️ 12. Monitoring Replication: Tools</h2>
                     <p class="text-lg text-gray-600 mb-4">Several powerful command-line and GUI tools are available to check, test, and troubleshoot Active Directory replication health.</p>
                     <div class="mt-6 space-y-6">
                         <div>
@@ -283,31 +291,58 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Navigation logic
+            const isMobile = window.innerWidth < 768;
             const navLinks = document.querySelectorAll('.nav-link');
             const contentCards = document.querySelectorAll('.concept-card');
             const navigation = document.getElementById('navigation');
-            function showContent(hash) {
-                const targetId = hash.substring(1);
-                contentCards.forEach(card => card.classList.add('hidden'));
-                const targetCard = document.getElementById(targetId);
-                if (targetCard) targetCard.classList.remove('hidden');
-                navLinks.forEach(link => {
-                    link.classList.toggle('active', link.getAttribute('href') === hash);
+            const sidebar = document.querySelector('nav');
+            const mainContent = document.querySelector('main');
+
+            if (isMobile) {
+                // --- Mobile Accordion Logic ---
+                sidebar.classList.add('hidden');
+                mainContent.classList.remove('md:w-3/4', 'lg:w-4/5', 'md:p-8', 'lg:p-10');
+                mainContent.classList.add('w-full', 'p-4');
+
+                contentCards.forEach(card => {
+                    card.classList.remove('hidden'); // Make sure all cards are visible
+                    const header = card.querySelector('h2');
+                    const content = Array.from(card.children).filter(child => child.tagName !== 'H2');
+                    
+                    // Initially hide content
+                    content.forEach(el => el.classList.add('hidden'));
+
+                    header.classList.add('cursor-pointer');
+                    header.addEventListener('click', () => {
+                        // Toggle content visibility
+                        const isHidden = content[0].classList.contains('hidden');
+                        content.forEach(el => el.classList.toggle('hidden', !isHidden));
+                    });
                 });
-            }
-            navigation.addEventListener('click', (e) => {
-                if (e.target.tagName === 'A') {
-                    e.preventDefault();
-                    const hash = e.target.getAttribute('href');
-                    if (window.location.hash !== hash) {
-                        window.location.hash = hash;
-                        showContent(hash);
-                    }
+            } else {
+                // --- Desktop Navigation Logic ---
+                function showContent(hash) {
+                    const targetId = hash.substring(1);
+                    contentCards.forEach(card => card.classList.add('hidden'));
+                    const targetCard = document.getElementById(targetId);
+                    if (targetCard) targetCard.classList.remove('hidden');
+                    navLinks.forEach(link => {
+                        link.classList.toggle('active', link.getAttribute('href') === hash);
+                    });
                 }
-            });
-            const initialHash = window.location.hash || '#dc';
-            showContent(initialHash);
+                navigation.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'A') {
+                        e.preventDefault();
+                        const hash = e.target.getAttribute('href');
+                        if (window.location.hash !== hash) {
+                            window.location.hash = hash;
+                            showContent(hash);
+                        }
+                    }
+                });
+                const initialHash = window.location.hash || '#dc';
+                showContent(initialHash);
+            }
 
             // USN Demo logic
             const usnChangeBtn = document.getElementById('usn-change-btn');
@@ -433,5 +468,3 @@
     </script>
 </body>
 </html>
-
-
