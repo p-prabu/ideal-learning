@@ -102,11 +102,15 @@
 </head>
 <body class="antialiased">
     <div class="flex flex-col md:flex-row min-h-screen">
-        <nav class="sidebar-panel w-full md:w-80 p-6 shrink-0 md:min-h-screen md:sticky md:top-0 overflow-y-auto hidden md:block">
-            <h1 class="text-2xl font-bold text-slate-800 mb-2 font-poppins">AD Troubleshooting</h1>
-            <p class="text-sm text-slate-500 mb-6">Complete Q&A with ready-to-run commands.</p>
-            <ul class="space-y-2" id="nav-links"></ul>
-        </nav>
+        <aside class="hidden md:flex md:w-80">
+            <div class="sidebar-panel flex flex-col w-full sticky top-0 max-h-screen p-6">
+                <h1 class="text-2xl font-bold text-slate-800 mb-2 font-poppins">AD Troubleshooting</h1>
+                <p class="text-sm text-slate-500 mb-4">Complete Q&A with ready-to-run commands.</p>
+                <div class="mt-2 flex-1 overflow-y-auto pr-2">
+                    <ul class="space-y-2" id="nav-links"></ul>
+                </div>
+            </div>
+        </aside>
 
         <main class="main-content w-full md:flex-1 p-4 md:p-8 lg:p-10 bg-slate-50/70">
             <header class="concept-card p-6 md:p-8 mb-6">
