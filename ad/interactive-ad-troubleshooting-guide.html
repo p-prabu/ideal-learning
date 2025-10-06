@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Active Directory Troubleshooting Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+        h1, h2, h3, h4, h5, h6, .heading-font {
+            font-family: 'Poppins', sans-serif;
+        }
+        .sidebar-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid rgba(148, 163, 184, 0.35);
+        }
+        .main-content {
+            background: linear-gradient(135deg, rgba(241, 245, 249, 0.96) 0%, rgba(226, 232, 240, 0.88) 100%);
+        }
+        .concept-card {
+            transition: all 0.3s ease-in-out;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            box-shadow: 0 18px 28px rgba(15, 23, 42, 0.08);
+            border-radius: 1rem;
+        }
+        .concept-card:hover {
+            box-shadow: 0 22px 34px rgba(15, 23, 42, 0.12);
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+            color: #475569;
+        }
+        .nav-link.active {
+            background-color: rgba(148, 163, 184, 0.32);
+            color: #0f172a;
+            font-weight: 600;
+            transform: translateX(4px);
+            box-shadow: none;
+        }
+        .nav-link:not(.active):hover {
+            background-color: rgba(148, 163, 184, 0.2);
+            color: #0f172a;
+            transform: translateX(2px);
+        }
+        .code-block {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            position: relative;
+            overflow-x: auto;
+        }
+        .copy-button {
+            position: absolute;
+            top: 0.6rem;
+            right: 0.6rem;
+            background-color: #475569;
+            color: #e2e8f0;
+            border: none;
+            padding: 0.25rem 0.55rem;
+            border-radius: 0.35rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .copy-button:hover {
+            background-color: #64748b;
+        }
+        .copy-button.copied {
+            background-color: #16a34a;
+            color: #ffffff;
+        }
+        .question-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 9999px;
+            background: linear-gradient(135deg, #38bdf8, #3b82f6);
+            color: #ffffff;
+            font-weight: 600;
+            margin-right: 0.75rem;
+        }
+        @media (max-width: 767px) {
+            .sidebar-panel {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <nav class="sidebar-panel w-full md:w-80 p-6 shrink-0 md:min-h-screen md:sticky md:top-0 overflow-y-auto hidden md:block">
+            <h1 class="text-2xl font-bold text-slate-800 mb-2 font-poppins">AD Troubleshooting</h1>
+            <p class="text-sm text-slate-500 mb-6">Complete Q&A with ready-to-run commands.</p>
+            <ul class="space-y-2" id="nav-links"></ul>
+        </nav>
+
+        <main class="main-content w-full md:flex-1 p-4 md:p-8 lg:p-10 bg-slate-50/70">
+            <header class="concept-card p-6 md:p-8 mb-6">
+                <h2 class="text-3xl font-bold text-slate-800 mb-2">Interactive Active Directory Troubleshooting Guide</h2>
+                <p class="text-slate-600">Your go-to resource for diagnosing and resolving AD issues, complete with context and copy-friendly commands.</p>
+            </header>
+            <div id="qa-container" class="space-y-6"></div>
+        </main>
+    </div>
+
+    <script>
+        const qaData = [
+            {
+                q: "1. What do the FSMO roles do?",
+                a: "Active Directory uses a multi-master model, but certain critical operations must be handled by a single server to prevent conflicts. These are managed by servers holding Flexible Single Master Operations (FSMO) roles: Schema Master, Domain Naming Master, RID Master, PDC Emulator, and Infrastructure Master.",
+                commands: [
+                    { lang: 'CMD', code: 'netdom query fsmo' },
+                    { lang: 'PowerShell', code: 'Get-ADForest | Select-Object SchemaMaster, DomainNamingMaster' },
+                    { lang: 'PowerShell', code: 'Get-ADDomain | Select-Object RIDMaster, PDCEmulator, InfrastructureMaster' }
+                ]
+            },
+            {
+                q: "2. How do I reset a computer's domain account?",
+                a: "You can reset a computer's secure channel password with the domain. This is often needed when the trust relationship between the computer and the domain fails.",
+                commands: [
+                    { lang: 'PowerShell', code: 'Reset-ComputerMachinePassword -Identity "ComputerName"' },
+                    { lang: 'CMD', code: 'nltest /sc_reset:<DomainName>' }
+                ]
+            },
+            {
+                q: "3. How do I troubleshoot the domain controller location process?",
+                a: "The DC location process relies heavily on DNS SRV records. If a client cannot find a DC, the problem is almost always related to DNS.",
+                commands: [
+                    { lang: 'CMD', code: 'Nltest /dsgetdc:<DomainName>' },
+                    { lang: 'PowerShell', code: 'Get-ADDomainController -DomainName <DomainName> -Discover' }
+                ]
+            },
+            {
+                q: "4. How do client computers locate a domain controller?",
+                a: "Clients query DNS for specific SRV (service) resource records to find a list of DCs in their site and domain. They then contact a DC from that list to authenticate.",
+                commands: [
+                    { lang: 'CMD', code: 'nslookup\nset type=srv\n_ldap._tcp.dc._msdcs.<DomainName>' },
+                    { lang: 'PowerShell', code: 'Resolve-DnsName -Name _ldap._tcp.dc._msdcs.<DomainName> -Type SRV' }
+                ]
+            },
+            {
+                q: "5. How can I manually sync the time of a client computer with the domain?",
+                a: "Time synchronization is critical for Kerberos authentication, which has a default tolerance of a 5-minute difference between the client and server.",
+                commands: [
+                    { lang: 'CMD', code: 'w32tm /resync /rediscover' },
+                    { lang: 'PowerShell', code: 'w32tm /resync' }
+                ]
+            },
+            {
+                q: "6. How can I tell if my PDC Emulator is working?",
+                a: "The PDC Emulator is the authoritative time source for the domain. Correct time synchronization is a key indicator of its health. You should also monitor event logs for errors related to the role.",
+                commands: [
+                    { lang: 'CMD', code: 'w32tm /query /source' },
+                    { lang: 'PowerShell', code: "Get-WinEvent -FilterHashtable @{LogName='System'; ProviderName='Microsoft-Windows-Time-Service'} | Format-Table -Wrap" }
+                ]
+            },
+            {
+                q: "7. How does domain time sync work?",
+                a: "Time synchronization is hierarchical. The PDC Emulator in the forest root domain is the top-level time source. DCs in child domains sync with the parent domain's PDC Emulator. Client computers sync with their authenticating DC.",
+                commands: []
+            },
+            {
+                q: "8. How do I move FSMO roles from one domain controller to another?",
+                a: "You can either transfer a role (a graceful move when the current owner is online) or seize a role (a forceful move when the current owner is offline permanently). PowerShell is the recommended method.",
+                commands: [
+                    { lang: 'PowerShell (Transfer)', code: 'Move-ADDirectoryServerOperationMasterRole -Identity "TargetDC" -OperationMasterRole PDCEmulator, RIDMaster, InfrastructureMaster' },
+                    { lang: 'PowerShell (Seize)', code: 'Move-ADDirectoryServerOperationMasterRole -Identity "TargetDC" -OperationMasterRole SchemaMaster -Force' },
+                    { lang: 'CMD (ntdsutil)', code: 'ntdsutil\nroles\nconnections\nconnect to server <TargetDCName>\nquit\ntransfer schema master' }
+                ]
+            },
+            {
+                q: "9. I have users who can't log on. How do I find the cause?",
+                a: "Troubleshoot methodically: 1. DC Location (Nltest) 2. Time Sync (w32tm) 3. Computer Account status 4. User Account status (locked/disabled/expired) 5. Event Logs on both client and DC.",
+                commands: []
+            },
+            {
+                q: "10. How does Kerberos work?",
+                a: "Kerberos is a ticket-based protocol. A user gets a Ticket-Granting Ticket (TGT) at logon. To access a resource, the user's TGT is used to request a service ticket, which is then presented to the resource server for access.",
+                commands: []
+            },
+            {
+                q: "11. How do I configure Kerberos?",
+                a: "Kerberos is configured automatically in Active Directory. Policies like ticket lifetimes can be adjusted via Group Policy under `Computer Configuration > Windows Settings > Security Settings > Account Policies > Kerberos Policy`.",
+                commands: []
+            },
+            {
+                q: "12. How can I ensure that Kerberos is working?",
+                a: "You can check a user's logon session to see if they have been issued Kerberos tickets. The `klist` utility is perfect for this.",
+                commands: [
+                    { lang: 'CMD', code: 'klist tickets' },
+                    { lang: 'CMD', code: 'klist purge' }
+                ]
+            },
+            {
+                q: "13. How are Relative Identifiers allocated?",
+                a: "The RID Master FSMO role holder allocates blocks of RIDs to each DC. When a DC's RID pool is low, it requests a new block from the RID Master.",
+                commands: []
+            },
+            {
+                q: "14. Why do deleted Active Directory objects sometimes reappear?",
+                a: "This happens when a DC that has been offline for longer than the tombstone lifetime (default is 60 or 180 days) is brought back online. The offline DC never received the deletion replication and reintroduces the 'live' object back into the environment.",
+                commands: []
+            },
+            {
+                q: "15. Why do objects sometimes appear in the Lost and Found folder?",
+                a: "This occurs when an object's parent container (like an OU) is deleted on one DC before the object itself has replicated to that DC. The object is now 'orphaned' and is placed in the `LostAndFound` container.",
+                commands: []
+            },
+            {
+                q: "16. How does the Knowledge Consistency Checker work?",
+                a: "The KCC is a process on every DC that automatically creates and maintains the replication topology by creating connection objects between DCs to ensure efficient and timely replication.",
+                commands: [
+                    { lang: 'CMD', code: 'repadmin /kcc' }
+                ]
+            },
+            {
+                q: "17. How can I force Active Directory to replicate changes?",
+                a: "You can manually initiate replication between DCs instead of waiting for the scheduled interval.",
+                commands: [
+                    { lang: 'CMD', code: 'repadmin /replicate <DestDC> <SourceDC> <NamingContext>' },
+                    { lang: 'CMD', code: 'repadmin /syncall <DCName> /APed' },
+                    { lang: 'PowerShell', code: 'Sync-ADObject -Object "<DistinguishedName>" -Source <SourceDC> -Destination <DestinationDC>' }
+                ]
+            },
+            {
+                q: "18. My Windows NT BDC stopped replicating. What do I do?",
+                a: "This occurs in a mixed-mode domain when the PDC Emulator FSMO role is unavailable. Windows NT Backup Domain Controllers (BDCs) replicate from the PDC Emulator. Ensure the PDC Emulator is online and accessible.",
+                commands: []
+            },
+            {
+                q: "19. How does Active Directory replication work?",
+                a: "AD uses a multi-master model where changes can be made on any DC. Those changes are then replicated to all other DCs in the domain through a topology automatically managed by the KCC.",
+                commands: []
+            },
+            {
+                q: "20. How can I check the replication topology for problems?",
+                a: "Use the `repadmin` command-line utility to view the replication status and identify any errors.",
+                commands: [
+                    { lang: 'CMD', code: 'repadmin /showrepl' },
+                    { lang: 'CMD', code: 'repadmin /replsummary' },
+                    { lang: 'PowerShell', code: 'Get-ADReplicationPartnerMetadata -Target <DCName>' }
+                ]
+            },
+            {
+                q: "21. How does DNS work?",
+                a: "DNS translates human-readable domain names (like www.google.com) into machine-readable IP addresses. It's a hierarchical system of servers that work together to resolve these queries.",
+                commands: []
+            },
+            {
+                q: "22. How do trusts work under AD?",
+                a: "Trusts are relationships between domains allowing users in one domain to access resources in another. In an AD forest, two-way, transitive trusts are created automatically between all domains.",
+                commands: []
+            },
+            {
+                q: "23. What does split-brain DNS mean?",
+                a: "This is a configuration where you have two DNS zones for the same domain: one for internal clients and one for external clients. This allows you to resolve the same name to different IP addresses depending on whether the query is from inside or outside your network.",
+                commands: []
+            },
+            {
+                q: "24. Why won't Active Directory let me create new objects?",
+                a: "This is typically caused by a problem with the RID Master. If the DC cannot contact the RID Master to get a new pool of RIDs, it cannot create new securable objects.",
+                commands: []
+            },
+            {
+                q: "25. How can I see why some DNS queries are failing?",
+                a: "You can use DNS troubleshooting tools to see the details of a query and its response.",
+                commands: [
+                    { lang: 'CMD', code: 'nslookup -debug <hostname>' },
+                    { lang: 'PowerShell', code: 'Resolve-DnsName -Name <hostname> -Verbose' },
+                    { lang: 'PowerShell', code: 'Test-DnsServer -IPAddress <DNSServerIP>' }
+                ]
+            },
+            {
+                q: "26. How does Active Directory use the Domain Name System?",
+                a: "Active Directory is completely dependent on DNS. DCs register SRV records in DNS so clients can locate them for logon, authentication, and other services. Without DNS, AD will not function.",
+                commands: []
+            },
+            {
+                q: "27. How can I use a non-Microsoft DNS server to support AD?",
+                a: "The DNS server must support SRV resource records (RFC 2782) and, preferably, dynamic updates (RFC 2136). Most modern BIND-based DNS servers meet these requirements.",
+                commands: []
+            },
+            {
+                q: "28. How do I troubleshoot FRS problems?",
+                a: "File Replication Service (FRS) replicates the SYSVOL share. Problems often manifest as inconsistent Group Policy application. Check the FRS event log for errors, especially 'journal wrap' errors.",
+                commands: [
+                    { lang: 'CMD', code: 'ntfrsutl ds' }
+                ]
+            },
+            {
+                q: "29. How do Active Directory permissions work?",
+                a: "Permissions are based on Access Control Lists (ACLs). Every object has an ACL that specifies which users and groups have what level of access. Permissions can be inherited from parent containers or assigned explicitly.",
+                commands: []
+            },
+            {
+                q: "30. When promoting a DC, the DNS server couldn't be located. What can I do?",
+                a: "This is a DNS client configuration issue on the server being promoted. Verify the server's IP settings and ensure it's pointing to a DNS server that can resolve names for your AD domain.",
+                commands: []
+            },
+            {
+                q: "31. How does the File Replication Service work?",
+                a: "FRS is a multi-master replication service for the SYSVOL share. It uses a 'last writer wins' approach, meaning if a file is changed on two DCs, the most recent change is kept.",
+                commands: []
+            },
+            {
+                q: "32. What's an easy way to troubleshoot permissions issues?",
+                a: "Use the Effective Permissions tool in the Advanced Security Settings for any object in Active Directory Users and Computers. It calculates and displays the final, effective permissions a user or group has on that object.",
+                commands: [
+                    { lang: 'PowerShell', code: '(Get-Acl "AD:<DistinguishedName>").Access | Where-Object {$_.IdentityReference -eq "<Domain\\\\User>"}' }
+                ]
+            },
+            {
+                q: "33. How does Active Directory communicate?",
+                a: "AD uses a suite of protocols, including LDAP (queries), RPC (replication), SMB (SYSVOL access), Kerberos (authentication), and DNS (name resolution).",
+                commands: []
+            },
+            {
+                q: "34. How do I troubleshoot Active Directory communications issues?",
+                a: "Use a network protocol analyzer like Wireshark to capture and analyze network traffic between clients and DCs. This allows you to see the raw packets and identify communication failures.",
+                commands: []
+            },
+            {
+                q: "35. DNS works sometimes, but sometimes it doesn't. What can we do?",
+                a: "Intermittent DNS failures can be caused by network connectivity issues, overloaded DNS servers, or incorrect client configuration (clients should point to multiple DNS servers). Flushing the DNS cache on the client can often help.",
+                commands: [
+                    { lang: 'CMD', code: 'ipconfig /flushdns' },
+                    { lang: 'PowerShell', code: 'Clear-DnsClientCache' }
+                ]
+            },
+            {
+                q: "36. How can we troubleshoot Group Policy application?",
+                a: "You can generate reports that show which Group Policy Objects (GPOs) are being applied to a user and computer using the `gpresult` utility.",
+                commands: [
+                    { lang: 'CMD', code: 'gpresult /r' },
+                    { lang: 'CMD', code: 'gpresult /h <path\\report.html>' },
+                    { lang: 'PowerShell', code: 'Get-GPOReport -Name "<GPOName>" -ReportType Html -Path <path\\report.html>' }
+                ]
+            },
+            {
+                q: "37. WAN links are over-utilized by AD replication. Why?",
+                a: "This can happen if the 'Bridge all site links' option is enabled (default). This prioritizes minimizing replication latency over conserving WAN bandwidth. To control bandwidth, disable this option in AD Sites and Services and manually create site link bridges to define a more efficient replication path.",
+                commands: []
+            }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('qa-container');
+            const navList = document.getElementById('nav-links');
+
+            qaData.forEach((item, index) => {
+                const id = `qa-${index + 1}`;
+
+                const navItem = document.createElement('li');
+                const navAnchor = document.createElement('a');
+                navAnchor.href = `#${id}`;
+                navAnchor.textContent = item.q;
+                navAnchor.className = 'nav-link block px-4 py-2.5 rounded-lg text-sm';
+                navItem.appendChild(navAnchor);
+                navList.appendChild(navItem);
+
+                const section = document.createElement('section');
+                section.className = 'concept-card p-6 md:p-8';
+                section.id = id;
+
+                const header = document.createElement('div');
+                header.className = 'flex items-center mb-3';
+                header.innerHTML = `<span class="question-number">${index + 1}</span><h2 class="text-xl md:text-2xl font-bold text-slate-800">${item.q}</h2>`;
+                section.appendChild(header);
+
+                const answer = document.createElement('p');
+                answer.className = 'text-slate-600 leading-relaxed';
+                answer.innerHTML = item.a;
+                section.appendChild(answer);
+
+                if (item.commands && item.commands.length > 0) {
+                    const commandHeader = document.createElement('h3');
+                    commandHeader.className = 'text-sm font-semibold text-slate-700 mt-5 mb-3 uppercase tracking-wide';
+                    commandHeader.textContent = 'Commands & PowerShell';
+                    section.appendChild(commandHeader);
+
+                    item.commands.forEach((cmd, cmdIndex) => {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'relative mb-4';
+
+                        const label = document.createElement('div');
+                        label.className = 'text-xs font-semibold text-sky-600 mb-1';
+                        label.textContent = cmd.lang;
+                        wrapper.appendChild(label);
+
+                        const pre = document.createElement('pre');
+                        pre.className = 'code-block';
+                        const codeId = `${id}-cmd-${cmdIndex}`;
+                        pre.id = codeId;
+                        const code = document.createElement('code');
+                        code.textContent = cmd.code;
+                        pre.appendChild(code);
+                        wrapper.appendChild(pre);
+
+                        const button = document.createElement('button');
+                        button.className = 'copy-button';
+                        button.dataset.target = `#${codeId}`;
+                        button.textContent = 'Copy';
+                        wrapper.appendChild(button);
+
+                        section.appendChild(wrapper);
+                    });
+                }
+
+                container.appendChild(section);
+            });
+
+            const navAnchors = document.querySelectorAll('.nav-link');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navAnchors.forEach(anchor => {
+                            anchor.classList.remove('active');
+                            const target = anchor.getAttribute('href');
+                            if (target === `#${entry.target.id}`) {
+                                anchor.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, { rootMargin: '-40% 0px -50% 0px' });
+
+            document.querySelectorAll('.concept-card').forEach(card => observer.observe(card));
+
+            document.addEventListener('click', (event) => {
+                const button = event.target.closest('.copy-button');
+                if (!button) return;
+                const targetSelector = button.dataset.target;
+                const targetElement = document.querySelector(targetSelector);
+                if (!targetElement) return;
+
+                const textToCopy = targetElement.textContent;
+
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    button.classList.add('copied');
+                    const original = button.textContent;
+                    button.textContent = 'Copied!';
+                    setTimeout(() => {
+                        button.textContent = original;
+                        button.classList.remove('copied');
+                    }, 2000);
+                }).catch(() => {
+                    try {
+                        const textArea = document.createElement('textarea');
+                        textArea.value = textToCopy;
+                        textArea.style.position = 'fixed';
+                        textArea.style.top = '-9999px';
+                        textArea.style.left = '-9999px';
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        button.classList.add('copied');
+                        const original = button.textContent;
+                        button.textContent = 'Copied!';
+                        setTimeout(() => {
+                            button.textContent = original;
+                            button.classList.remove('copied');
+                        }, 2000);
+                    } catch (err) {
+                        console.error('Fallback copy failed:', err);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
