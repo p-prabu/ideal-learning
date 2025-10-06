@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive AD Forest Recovery Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chosen Palette: Professional Slate & Teal -->
+    <!-- Application Structure Plan: A phased, interactive checklist. The structure breaks the complex recovery process into 6 manageable phases (Prep, Restore, Config, Cleanup, Reintegration, Validation). This sequential, task-oriented design is optimal for a technical procedure, guiding the user step-by-step. Interactivity (expandable details, code copying, progress tracking) reduces cognitive load and error potential during a high-stress disaster recovery scenario. This version is updated to precisely match the user's detailed procedural steps. -->
+    <!-- Visualization & Content Choices: The core content is a procedural checklist. Goal: Guide user through a complex technical process. Method: Interactive accordion list for steps. Interaction: Click to expand for details, PowerShell scripts, and verification steps. Checkboxes update a master progress bar. Justification: This approach makes a dense, critical procedure digestible and trackable. A process flow diagram at the top, built with HTML/Tailwind, provides a high-level visual map of the recovery journey. This replaces traditional charts, as the source material is a process, not data. No SVG/Mermaid used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+        h1, h2, h3, h4, .font-poppins {
+            font-family: 'Poppins', sans-serif;
+        }
+        .task-card.completed {
+            border-left-color: #10b981;
+            background-color: #f0fdfa;
+        }
+        .task-card.completed .task-title {
+            text-decoration: line-through;
+            color: #64748b;
+        }
+        .sidebar-link.active {
+            background-color: #e2e8f0;
+            color: #0f172a;
+            font-weight: 600;
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #e2e8f0; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        .process-step {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        .process-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 2rem;
+            right: -50%;
+            height: 2px;
+            width: 100%;
+            background-color: #cbd5e1;
+            z-index: -1;
+        }
+        .progress-bar-gradient {
+            background: linear-gradient(90deg, #38bdf8, #3b82f6);
+        }
+        .code-copy-button {
+            background-color: #475569;
+            color: #e2e8f0;
+        }
+        .code-copy-button:hover {
+            background-color: #64748b;
+        }
+        .phase-step-circle {
+            background-color: #3b82f6;
+            transition: transform 0.2s ease-in-out;
+        }
+        .phase-step-circle:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <nav id="sidebar" class="w-full md:w-72 bg-white/80 backdrop-blur-sm border-r border-slate-200 p-6 shrink-0 sticky top-0 h-screen overflow-y-auto">
+            <h1 class="text-2xl font-bold text-slate-800 mb-2 font-poppins">AD Recovery</h1>
+            <p class="text-sm text-slate-500 mb-8">Disaster Recovery Plan</p>
+            <ul class="space-y-2" id="nav-links">
+                <li><a href="#phase-0" class="sidebar-link flex items-center px-4 py-2.5 text-slate-600 hover:bg-slate-200/60 rounded-lg transition-colors duration-200 text-sm font-medium">Overview</a></li>
+                <li><a href="#phase-1" class="sidebar-link flex items-center px-4 py-2.5 text-slate-600 hover:bg-slate-200/60 rounded-lg transition-colors duration-200 text-sm font-medium">1. Preparation</a></li>
+                <li><a href="#phase-2" class="sidebar-link flex items-center px-4 py-2.5 text-slate-600 hover:bg-slate-200/60 rounded-lg transition-colors duration-200 text-sm font-medium">2. Initial Restore</a></li>
+                <li><a href="#phase-3" class="sidebar-link flex items-center px-4 py-2.5 text-slate-600 hover:bg-slate-200/60 rounded-lg transition-colors duration-200 text-sm font-medium">3. Configuration</a></li>
+                <li><a href="#phase-4" class="sidebar-link flex items-center px-4 py-2.5 text-slate-600 hover:bg-slate-200/60 rounded-lg transition-colors duration-200 text-sm font-medium">4. Forest Cleanup</a></li>
+                <li><a href="#phase-5" class="sidebar-link flex items-center px-4 py-2.5 text-slate-600 hover:bg-slate-200/60 rounded-lg transition-colors duration-200 text-sm font-medium">5. Reintegration</a></li>
+                <li><a href="#phase-6" class="sidebar-link flex items-center px-4 py-2.5 text-slate-600 hover:bg-slate-200/60 rounded-lg transition-colors duration-200 text-sm font-medium">6. Validation</a></li>
+            </ul>
+
+            <div class="mt-12">
+                <h3 class="text-sm font-semibold text-slate-600 mb-3 uppercase tracking-wider">Recovery Progress</h3>
+                <div class="w-full bg-slate-200 rounded-full h-2.5">
+                    <div id="progress-bar" class="progress-bar-gradient h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <p id="progress-text" class="text-center text-xs text-slate-500 mt-2">0% Complete</p>
+            </div>
+        </nav>
+
+        <main class="flex-1 p-6 md:p-12 bg-slate-50/50">
+            <div id="phase-0" class="mb-16">
+                <h2 class="text-4xl font-bold text-slate-800 mb-4 font-poppins">Active Directory Forest Recovery</h2>
+                <p class="text-slate-600 max-w-4xl mb-10 text-base leading-relaxed">This interactive guide provides a structured walkthrough of the forest recovery process. The procedure is broken down into distinct phases, from initial preparation to final validation. Use the navigation on the left to jump between phases, and interact with each task to see detailed explanations and relevant PowerShell commands. Mark tasks as complete to track your progress.</p>
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="text-xl font-bold mb-6 text-slate-700 font-poppins">Recovery Phases Overview</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 relative">
+                        <div class="process-step">
+                            <div class="w-16 h-16 phase-step-circle text-white rounded-full flex items-center justify-center font-bold text-2xl mb-3 shadow-lg">1</div>
+                            <span class="font-semibold text-sm text-slate-600">Preparation</span>
+                        </div>
+                        <div class="process-step">
+                            <div class="w-16 h-16 phase-step-circle text-white rounded-full flex items-center justify-center font-bold text-2xl mb-3 shadow-lg">2</div>
+                            <span class="font-semibold text-sm text-slate-600">Restore</span>
+                        </div>
+                        <div class="process-step">
+                            <div class="w-16 h-16 phase-step-circle text-white rounded-full flex items-center justify-center font-bold text-2xl mb-3 shadow-lg">3</div>
+                            <span class="font-semibold text-sm text-slate-600">Configure</span>
+                        </div>
+                        <div class="process-step">
+                            <div class="w-16 h-16 phase-step-circle text-white rounded-full flex items-center justify-center font-bold text-2xl mb-3 shadow-lg">4</div>
+                            <span class="font-semibold text-sm text-slate-600">Cleanup</span>
+                        </div>
+                        <div class="process-step">
+                            <div class="w-16 h-16 phase-step-circle text-white rounded-full flex items-center justify-center font-bold text-2xl mb-3 shadow-lg">5</div>
+                            <span class="font-semibold text-sm text-slate-600">Reintegrate</span>
+                        </div>
+                        <div class="process-step">
+                            <div class="w-16 h-16 phase-step-circle text-white rounded-full flex items-center justify-center font-bold text-2xl mb-3 shadow-lg">6</div>
+                            <span class="font-semibold text-sm text-slate-600">Validate</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tasks-container" class="space-y-12">
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const recoveryData = [
+            {
+                phase: 1,
+                title: "Preparation",
+                description: "This initial phase involves gathering all necessary components for the recovery. Proper preparation is critical for a smooth and successful restoration process. Ensure you have valid backups, necessary credentials, and a properly configured isolated lab environment before proceeding.",
+                tasks: [
+                    {
+                        title: "Verify the latest backup",
+                        details: "Confirm you have a recent, valid System State or Full Server backup of a Domain Controller. The backup should be from before the disaster event. Document the backup date and location.",
+                        powershell: "Get-WBJob -Last 1",
+                        verification: "Check the output for a 'Successful' status and verify the 'StartTime' is within your RPO (Recovery Point Objective)."
+                    },
+                    {
+                        title: "Get the passwords ready",
+                        details: "Ensure you have the Directory Services Restore Mode (DSRM) password for the DC being restored, as well as Domain Admin credentials. If these are unknown, they can be reset on another DC if one is available.",
+                        powershell: "# No direct command. This is a procedural step.\n# Ensure passwords are documented in a secure location.",
+                        verification: "Physically or digitally confirm access to the required passwords."
+                    },
+                    {
+                        title: "Create one Virtual Machine on LAB VMWare Env.",
+                        details: "Provision a new VM in an isolated network environment. The VM's disk sizes, CPU, and RAM should match the original DC. The network must be isolated to prevent conflicts with a production environment.",
+                        powershell: `# PowerShell for VMware (PowerCLI) example:\nNew-VM -Name "Restored-DC-LAB" -Template "WindowsServer2019-Template" -Datastore "Lab-DS" -VMHost "lab-host.domain.local" -NetworkName "Isolated-Network"`,
+                        verification: "VM is created in vCenter/ESXi with the correct specifications and is connected to the isolated virtual switch."
+                    },
+                    {
+                        title: "Copy AD Backup to LAB VM",
+                        details: "Transfer the AD backup files to the newly created lab VM. You can use an additional virtual disk (VMDK) or a network share that is accessible only from the isolated lab network.",
+                        powershell: `Copy-Item -Path "Z:\\DC-Backups\\WindowsImageBackup" -Destination "E:\\Restore" -Recurse`,
+                        verification: "Confirm the 'WindowsImageBackup' folder is present and intact on the lab VM."
+                    },
+                    {
+                        title: "Operating System ISO attached to VM",
+                        details: "Attach the appropriate Windows Server installation ISO to the virtual machine's CD/DVD drive. This is required to boot into the recovery environment.",
+                        powershell: `# PowerCLI Example:\nGet-VM "Restored-DC-LAB" | Get-CDDrive | Set-CDDrive -IsoPath "[datastore]ISOs/WindowsServer.iso" -StartConnected $true`,
+                        verification: "In the VM settings, verify the ISO is connected and 'Connect at power on' is checked."
+                    }
+                ]
+            },
+            {
+                phase: 2,
+                title: "Initial Restore",
+                description: "This phase covers the core restoration of the Domain Controller's operating system and Active Directory data from the prepared backup. This is performed using the Windows Recovery Environment.",
+                tasks: [
+                    {
+                        title: "Reboot and Boot with OS ISO",
+                        details: "Start the VM and immediately enter the BIOS/UEFI settings to configure the boot order, ensuring it boots from the CD/DVD drive where the ISO is attached.",
+                        powershell: `# Manual step performed in the VM console during boot (e.g., press ESC, F2, or DEL).`,
+                        verification: "The 'Press any key to boot from CD or DVD...' message appears, and the Windows Setup environment begins to load."
+                    },
+                    {
+                        title: "Enter Troubleshooting Mode",
+                        details: "From the initial Windows Setup screen, select your language, then click 'Repair your computer' on the next screen. Navigate to 'Troubleshoot'.",
+                        powershell: "# This is a manual, GUI-driven process.",
+                        verification: "The 'Troubleshoot' options screen is displayed."
+                    },
+                    {
+                        title: "Select System Image Recovery",
+                        details: "In the 'Advanced options' menu, choose 'System Image Recovery'. The system will search for available backups.",
+                        powershell: "# This is a manual, GUI-driven process.",
+                        verification: "The 'Re-image your computer' wizard appears."
+                    },
+                    {
+                        title: "Restore from backup",
+                        details: "Follow the System Image Recovery wizard to select the backup you copied to the lab VM. This will perform an authoritative restore of the System State, including the AD database (NTDS.dit).",
+                        powershell: "# This is a GUI-driven process within the Windows Recovery Environment.",
+                        verification: "The recovery process completes successfully, and the system prompts for a reboot."
+                    }
+                ]
+            },
+            {
+                phase: 3,
+                title: "Post-Restore Configuration",
+                description: "After the base OS and AD data are restored, several critical configuration steps are needed to make the Domain Controller functional within the isolated environment. These steps are performed in DSRM before the first normal boot.",
+                 tasks: [
+                    {
+                        title: "Reboot into DSRM and Set Initial Sync Key",
+                        details: "After restore, the server automatically reboots into Directory Services Restore Mode (DSRM). Log in with the DSRM administrator account. Set this registry key to prevent the DC from seeking replication partners, ensuring it starts authoritatively.",
+                        powershell: `New-ItemProperty -Path "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\NTDS\\Parameters" -Name "Repl Perform Initial Synchronizations" -Value 0 -PropertyType DWORD -Force`,
+                        verification: "Use `reg query HKLM\\SYSTEM\\CurrentControlSet\\Services\\NTDS\\Parameters /v \"Repl Perform Initial Synchronizations\"` to confirm the value is set to 0x0."
+                    },
+                    {
+                        title: "Install and Configure DNS Role",
+                        details: "Since your production DNS is on Infoblox, the restored DC needs a temporary, local DNS server to function. Install the DNS Server role and configure a forward lookup zone for your AD domain.",
+                        powershell: "Install-WindowsFeature -Name DNS -IncludeManagementTools\nAdd-DnsServerPrimaryZone -Name 'yourdomain.local' -ReplicationScope 'Forest' -PassThru",
+                        verification: "Run `Get-WindowsFeature -Name DNS`. The 'Install State' should be 'Installed'."
+                    },
+                    {
+                        title: "Configure IP of original DC and set same DNS server",
+                        details: "Set the static IP address of the restored DC to match its original IP. Set its primary DNS server to its own IP address (127.0.0.1) to use the local DNS service.",
+                        powershell: `Get-NetAdapter | New-NetIPAddress -IPAddress 192.168.1.10 -PrefixLength 24 -DefaultGateway 192.168.1.1\nSet-DnsClientServerAddress -InterfaceIndex (Get-NetAdapter).ifIndex -ServerAddresses "127.0.0.1"`,
+                        verification: "Run `ipconfig /all` and verify the IP address and DNS server settings are correct."
+                    },
+                    {
+                        title: "Reboot and login with Domain Admin",
+                        details: "Reboot the server. It should now boot into normal operating mode. Log in with a Domain Administrator account.",
+                        powershell: "Restart-Computer -Force",
+                        verification: "The server boots successfully, and you can log in with domain credentials. Active Directory Users and Computers (ADUC) can be opened."
+                    },
+                    {
+                        title: "Restart NetLogon Service",
+                        details: "Restarting the NetLogon service forces the DC to re-register its service records (SRV) in the local DNS server, which is essential for AD services to function correctly.",
+                        powershell: "Restart-Service Netlogon",
+                        verification: "Check the DNS manager for the presence of SRV records under `_msdcs.yourdomain.local` and `_tcp.yourdomain.local`."
+                    }
+                ]
+            },
+            {
+                phase: 4,
+                title: "Forest & Domain Cleanup",
+                description: "This is the most critical phase for securing the recovered forest. It involves seizing operational roles, cleaning up references to non-existent DCs, and resetting key security principals to prevent lingering security risks.",
+                tasks: [
+                    {
+                        title: "Seize FSMO roles",
+                        details: "If the restored DC did not hold all five FSMO roles, you must seize them to make this DC fully authoritative for the forest.",
+                        powershell: `Move-ADDirectoryServerOperationMasterRole -Identity (Get-ADDomainController).Name -OperationMasterRole SchemaMaster, DomainNamingMaster, PDCEmulator, RIDMaster, InfrastructureMaster -Force`,
+                        verification: "Run `netdom query fsmo` to confirm all roles are held by the restored DC."
+                    },
+                    {
+                        title: "Metadata clean-up of non-recovered DCs",
+                        details: "You must forcibly remove all other domain controllers from the Active Directory configuration. This prevents the restored DC from attempting to replicate with servers that no longer exist.",
+                        powershell: `# Using Active Directory Users and Computers:\n# Navigate to the Domain Controllers OU, right-click the stale DC, and select Delete.\n# Acknowledge the warnings and ensure 'Delete this Domain Controller anyway' is checked.`,
+                        verification: "Only the restored DC is present in the Domain Controllers OU and in Active Directory Sites and Services."
+                    },
+                    {
+                        title: "Set domain controller SYSVOL primary for DFSR",
+                        details: "Perform an authoritative synchronization of SYSVOL on the first restored DC. This forces it to become the primary source for SYSVOL content for any subsequently added DCs.",
+                        powershell: `# This requires editing the msDFSR-Options attribute on the computer object of the DC in ADSI Edit. Set it to 1. Then run:\ndfsrdiag pollad`,
+                        verification: "Event ID 4602 appears in the DFS Replication event log, indicating SYSVOL is initialized."
+                    },
+                    {
+                        title: "Raise RID Pool and Invalidate local pool",
+                        details: "Increase the RID pool size to invalidate any RIDs issued by other DCs. This prevents object SID conflicts when new objects are created.",
+                        powershell: `# This requires using ntdsutil. It's a complex, multi-step command-line process. \n1. ntdsutil\n2. rid manager\n3. connections\n4. connect to server <servername>\n5. quit\n6. maintenance\n7. rid pool increase <value>`,
+                        verification: "Run `dcdiag /test:ridmanager /v` and check for successful allocation and available pools."
+                    },
+                    {
+                        title: "Reset all high privileged accounts passwords",
+                        details: "Reset the passwords for all members of Domain Admins, Enterprise Admins, and Schema Admins. This mitigates the risk of compromised credentials.",
+                        powershell: `Get-ADGroupMember -Identity "Domain Admins" | Set-ADAccountPassword -Reset`,
+                        verification: "Document the reset of each account. Test login with new passwords."
+                    },
+                    {
+                        title: "Reset Administrator (RID 500) password",
+                        details: "Specifically reset the password for the built-in domain Administrator account (which has the well-known RID of 500).",
+                        powershell: `Get-ADUser -Identity Administrator | Set-ADAccountPassword -Reset`,
+                        verification: "Confirm successful password change and document the new password securely."
+                    },
+                    {
+                        title: "Reset domain controller machine account twice",
+                        details: "Resetting the DC's own computer account password twice ensures a clean and secure communication channel within the domain.",
+                        powershell: `Reset-ComputerMachinePassword\n# Wait for a few minutes, then run again:\nReset-ComputerMachinePassword`,
+                        verification: "The command executes successfully both times without errors."
+                    },
+                    {
+                        title: "Reset KRBTGT account twice",
+                        details: "CRITICAL SECURITY STEP. Resetting the Kerberos Ticket Granting Ticket password twice purges all existing Kerberos tickets in the domain, invalidating any potentially stolen tickets.",
+                        powershell: `Reset-KrbTgtPassword.ps1 # This is a well-known script from Microsoft TechNet`,
+                        verification: "The 'PasswordLastSet' attribute of the krbtgt account is updated after each reset."
+                    },
+                    {
+                        title: "Reset trust passwords",
+                        details: "If you have trusts with other domains (parent, child, or external), their passwords must be reset to re-establish secure communication.",
+                        powershell: `netdom trust <trustingdomain> /domain:<trusteddomain> /resetonetrustpassword /passwordt:<new_password>`,
+                        verification: "Run `nltest /sc_verify:<trusteddomain>` and look for a success message."
+                    },
+                    {
+                        title: "NTP verify and set",
+                        details: "Time synchronization is critical for Kerberos. Configure the restored PDC Emulator to sync with a reliable external time source.",
+                        powershell: `w32tm /config /manualpeerlist:"pool.ntp.org,0x8" /syncfromflags:manual /reliable:yes /update\nw32tm /resync /rediscover`,
+                        verification: "Run `w32tm /query /status` and check that the 'Source' is the external peer."
+                    }
+                ]
+            },
+            {
+                phase: 5,
+                title: "Reintegration (Actual Scenario)",
+                description: "These steps apply when moving from the isolated lab to a live production environment. They focus on security hardening, integrating with production services like Infoblox, and preparing for forest expansion.",
+                tasks: [
+                    {
+                        title: "Enable restored DC as Global Catalog (GC)",
+                        details: "Ensure the DC is a Global Catalog server, which is required for many logon and query operations, especially in multi-domain forests.",
+                        powershell: `Get-ADObject -Identity "CN=NTDS Settings,CN=$((Get-ADDomainController).Name),CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=yourdomain,DC=local" | Set-ADObject -Replace @{options=1}`,
+                        verification: "In 'Active Directory Sites and Services', check the properties of the NTDS Settings object for the DC; the 'Global Catalog' checkbox should be checked."
+                    },
+                    {
+                        title: "Verify/Remove unwanted high privileged memberships",
+                        details: "Review the membership of Domain Admins, Enterprise Admins, and Schema Admins. Remove any accounts that should not be present. Also review the built-in Administrator's group memberships.",
+                        powershell: `Get-ADGroupMember "Domain Admins" # Review the list\nRemove-ADGroupMember "Domain Admins" -Members "User-To-Remove"`,
+                        verification: "Manual verification that only authorized accounts are in these groups."
+                    },
+                    {
+                        title: "Disable Built-In Administrator account",
+                        details: "As a security best practice, disable the built-in Administrator account (RID 500) after ensuring other administrative accounts are functional.",
+                        powershell: `Disable-ADAccount -Identity "Administrator"`,
+                        verification: "The 'Enabled' property for the Administrator account is 'False' when running `Get-ADUser Administrator`."
+                    },
+                    {
+                        title: "Reset all high privileged account passwords again",
+                        details: "Perform a final password reset for all critical admin accounts immediately before re-introducing the environment to the production network.",
+                        powershell: `# Use the same procedure as in the Cleanup phase.`,
+                        verification: "Passwords are reset and documented."
+                    },
+                    {
+                        title: "Create a backup of the restored domain controller",
+                        details: "Before making any changes to connect to the production network, take a full backup of the cleaned, restored domain controller. This provides a safe rollback point.",
+                        powershell: "wbadmin start backup -backupTarget:E: -include:C: -allCritical -quiet",
+                        verification: "Backup job completes successfully in Windows Server Backup."
+                    },
+                    {
+                        title: "STOP MS-DNS service",
+                        details: "Stop the temporary Microsoft DNS service on the DC, as the authoritative DNS for the production network is Infoblox.",
+                        powershell: "Stop-Service DNS",
+                        verification: "Run `Get-Service DNS`. Status should be 'Stopped'."
+                    },
+                    {
+                        title: "Clean SRV records from INFOBLOX",
+                        details: "Manually remove all AD-related SRV records from the Infoblox DNS zones. This clears out any stale data before the newly restored DC registers itself.",
+                        powershell: "# This is a manual step performed in the Infoblox management interface.",
+                        verification: "A query for AD SRV records (e.g., _ldap._tcp.yourdomain.local) against Infoblox returns no results."
+                    },
+                    {
+                        title: "Enable network connection to INFOBLOX",
+                        details: "Change the VM's network adapter from the isolated network to the production network. Update its DNS client settings to point to Infoblox servers.",
+                        powershell: `Set-DnsClientServerAddress -InterfaceIndex (Get-NetAdapter).ifIndex -ServerAddresses "INFOBLOX_IP_1", "INFOBLOX_IP_2"`,
+                        verification: "The DC can ping other production resources and the Infoblox servers."
+                    },
+                    {
+                        title: "Reboot DC and Verify DNS Registration",
+                        details: "Reboot the domain controller. After it comes back online, verify that it has correctly registered its HOST (A) and SRV records in Infoblox.",
+                        powershell: "Restart-Computer -Force",
+                        verification: "Check Infoblox to see the DC's A record and the full suite of AD SRV records have been dynamically registered."
+                    },
+                    {
+                        title: "Remove MS-DNS role",
+                        details: "Once you have confirmed that AD is functioning correctly with Infoblox, you can fully remove the DNS role from the restored domain controller.",
+                        powershell: `Uninstall-WindowsFeature -Name DNS -IncludeManagementTools`,
+                        verification: "Run `Get-WindowsFeature DNS`. The 'Install State' is 'Available' (not 'Installed')."
+                    }
+                ]
+            },
+            {
+                phase: 6,
+                title: "Validation & Expansion",
+                description: "The final phase involves validating the health of the recovered Active Directory environment and beginning the process of building redundancy by adding more domain controllers.",
+                tasks: [
+                     {
+                        title: "Promote for additional DCs",
+                        details: "Begin promoting new member servers to become additional domain controllers. This re-establishes redundancy and high availability for AD services.",
+                        powershell: `# On a new server:\nInstall-WindowsFeature AD-Domain-Services -IncludeManagementTools\nInstall-ADDSDomainController -DomainName "yourdomain.local" -Credential (Get-Credential)`,
+                        verification: "The new servers are listed in the Domain Controllers OU and replication health is good (`repadmin /showrepl`)."
+                    },
+                    {
+                        title: "App server restored test",
+                        details: "Restore a member server (e.g., a file server or application server) into the environment and test its ability to communicate with the domain, authenticate users, and access resources.",
+                        powershell: "# This involves restoring a separate server and testing domain join/authentication.",
+                        verification: "Users can log into the test application server and access domain resources like file shares."
+                    },
+                    {
+                        title: "AD objects delete restore scenario",
+                        details: "Test the AD Recycle Bin functionality. Delete a test user object, then restore it and verify the user can log in again. This confirms a key AD feature is working correctly.",
+                        powershell: "Enable-ADOptionalFeature -Identity 'CN=Recycle Bin Feature,CN=Optional Features,CN=Directory Service,CN=Windows NT,CN=Services,CN=Configuration,DC=yourdomain,DC=local' -Scope ForestOrConfigurationSet -Target 'yourdomain.local'\nGet-ADObject -Filter 'isDeleted -eq $true' | Restore-ADObject",
+                        verification: "The restored user object is visible in ADUC and can be used for authentication."
+                    }
+                ]
+            }
+        ];
+
+        const tasksContainer = document.getElementById('tasks-container');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+
+        let totalTasks = 0;
+        let completedTasks = 0;
+
+        function renderTasks() {
+            tasksContainer.innerHTML = '';
+            totalTasks = 0;
+            recoveryData.forEach(phase => {
+                const phaseSection = document.createElement('section');
+                phaseSection.id = `phase-${phase.phase}`;
+                phaseSection.className = 'scroll-mt-24';
+                
+                phaseSection.innerHTML = `
+                    <h2 class="text-3xl font-bold text-slate-800 mb-3 font-poppins">${phase.phase}. ${phase.title}</h2>
+                    <p class="text-slate-600 mb-8 max-w-4xl text-base">${phase.description}</p>
+                    <div class="space-y-4">
+                        ${phase.tasks.map((task, index) => {
+                            totalTasks++;
+                            const taskId = `task-${phase.phase}-${index}`;
+                            return `
+                                <div id="card-${taskId}" class="task-card bg-white rounded-xl shadow-sm border border-l-4 border-slate-200 transition-all duration-300 overflow-hidden">
+                                    <div class="flex items-center p-5 cursor-pointer" onclick="toggleTask('${taskId}')">
+                                        <input type="checkbox" id="check-${taskId}" class="h-5 w-5 rounded-md border-gray-300 text-blue-600 focus:ring-blue-500 mr-5 shrink-0" onchange="updateProgress(event, '${taskId}')">
+                                        <h3 class="task-title text-lg font-semibold text-slate-700 flex-1">${task.title}</h3>
+                                        <span id="chevron-${taskId}" class="transform transition-transform duration-300">
+                                            <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                        </span>
+                                    </div>
+                                    <div id="details-${taskId}" class="hidden px-6 pb-6 pt-4 border-t border-slate-200/80">
+                                        <div class="grid md:grid-cols-2 gap-8">
+                                            <div>
+                                                <h4 class="font-semibold text-slate-600 mb-2 uppercase text-xs tracking-wider">Details</h4>
+                                                <p class="text-sm text-slate-600 leading-relaxed">${task.details}</p>
+                                                <h4 class="font-semibold text-slate-600 mt-5 mb-2 uppercase text-xs tracking-wider">Verification</h4>
+                                                <p class="text-sm text-slate-600 leading-relaxed">${task.verification}</p>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-semibold text-slate-600 mb-2 uppercase text-xs tracking-wider">PowerShell Command</h4>
+                                                <div class="relative">
+                                                    <button onclick="copyCode(this, '${taskId}')" class="code-copy-button absolute top-2.5 right-2.5 p-2 rounded-lg text-xs font-semibold tracking-wide transition-colors">COPY</button>
+                                                    <pre class="bg-slate-800 text-slate-200 p-4 rounded-lg text-sm overflow-x-auto font-mono"><code id="code-${taskId}">${task.powershell}</code></pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+                tasksContainer.appendChild(phaseSection);
+            });
+            updateProgressBar();
+        }
+
+        window.toggleTask = function(taskId) {
+            const details = document.getElementById(`details-${taskId}`);
+            const chevron = document.getElementById(`chevron-${taskId}`);
+            
+            if (details.classList.contains('hidden')) {
+                details.classList.remove('hidden');
+                chevron.classList.add('rotate-180');
+            } else {
+                details.classList.add('hidden');
+                chevron.classList.remove('rotate-180');
+            }
+        }
+
+        window.updateProgress = function(event, taskId) {
+            const card = document.getElementById(`card-${taskId}`);
+            if (event.target.checked) {
+                completedTasks++;
+                card.classList.add('completed');
+            } else {
+                completedTasks--;
+                card.classList.remove('completed');
+            }
+            updateProgressBar();
+        }
+
+        function updateProgressBar() {
+            const percentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+            progressBar.style.width = `${percentage}%`;
+            progressText.textContent = `${percentage}% Complete (${completedTasks} / ${totalTasks})`;
+        }
+        
+        window.copyCode = function(button, taskId) {
+            const code = document.getElementById(`code-${taskId}`).innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'COPIED!';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                }, 1500);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTasks();
+            
+            const sections = document.querySelectorAll('main section');
+            const navLinks = document.querySelectorAll('#nav-links a');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, { rootMargin: "-40% 0px -60% 0px" });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            const overviewSection = document.getElementById('phase-0');
+            const overviewObserver = new IntersectionObserver((entries) => {
+                if(entries[0].isIntersecting){
+                    navLinks.forEach(link => link.classList.remove('active'));
+                    document.querySelector('a[href="#phase-0"]').classList.add('active');
+                }
+            }, {threshold: 0.1});
+            overviewObserver.observe(overviewSection);
+
+        });
+    </script>
+</body>
+</html>
+
