@@ -329,7 +329,148 @@
             },
             {
                 q: "33. How does Active Directory communicate?",
-                a: "AD uses a suite of protocols, including LDAP (queries), RPC (replication), SMB (SYSVOL access), Kerberos (authentication), and DNS (name resolution).",
+                a: `<p>AD relies on a collection of well-known ports and protocols to keep authentication, replication, and management traffic flowing between clients and domain controllers. Ensure the following services are permitted bi-directionally across firewalls.</p>
+                    <div class="overflow-x-auto mt-4">
+                        <table class="min-w-full text-sm text-slate-600 border border-slate-200">
+                            <thead class="bg-slate-100 text-slate-700">
+                                <tr>
+                                    <th class="px-3 py-2 text-left border-b border-slate-200">Service</th>
+                                    <th class="px-3 py-2 text-left border-b border-slate-200">Port</th>
+                                    <th class="px-3 py-2 text-left border-b border-slate-200">Protocol</th>
+                                    <th class="px-3 py-2 text-left border-b border-slate-200">Purpose</th>
+                                    <th class="px-3 py-2 text-left border-b border-slate-200">Direction</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-slate-200">
+                                    <td class="px-3 py-2 font-medium text-slate-800">NetBIOS Name Service / EventLog</td>
+                                    <td class="px-3 py-2">137</td>
+                                    <td class="px-3 py-2">UDP</td>
+                                    <td class="px-3 py-2">Network basic I/O system name lookups.</td>
+                                    <td class="px-3 py-2">Bi-directional</td>
+                                </tr>
+                                <tr class="border-b border-slate-200">
+                                    <td class="px-3 py-2 font-medium text-slate-800">NetBIOS Datagram / EventLog</td>
+                                    <td class="px-3 py-2">138</td>
+                                    <td class="px-3 py-2">UDP</td>
+                                    <td class="px-3 py-2">Connectionless NetBIOS messaging.</td>
+                                    <td class="px-3 py-2">Bi-directional</td>
+                                </tr>
+                                <tr class="border-b border-slate-200">
+                                    <td class="px-3 py-2 font-medium text-slate-800">NetBIOS Session Service / EventLog</td>
+                                    <td class="px-3 py-2">139</td>
+                                    <td class="px-3 py-2">TCP</td>
+                                    <td class="px-3 py-2">Session-oriented NetBIOS over TCP/IP.</td>
+                                    <td class="px-3 py-2">Bi-directional</td>
+                                </tr>
+                                <tr class="border-b border-slate-200">
+                                    <td class="px-3 py-2 font-medium text-slate-800">Active Directory Web Services</td>
+                                    <td class="px-3 py-2">9389</td>
+                                    <td class="px-3 py-2">TCP</td>
+                                    <td class="px-3 py-2">AD Web Services (PowerShell/REST consumers).</td>
+                                    <td class="px-3 py-2">Bi-directional</td>
+                                </tr>
+                                <tr class="border-b border-slate-200">
+                                    <td class="px-3 py-2 font-medium text-slate-800">ICMP</td>
+                                    <td class="px-3 py-2">—</td>
+                                    <td class="px-3 py-2">ICMP</td>
+                                    <td class="px-3 py-2">Reachability and health monitoring.</td>
+                                    <td class="px-3 py-2">Bi-directional</td>
+                                </tr>
+                                <tr class="border-b border-slate-200">
+                                    <td class="px-3 py-2 font-medium text-slate-800">DNS</td>
+                                    <td class="px-3 py-2">53</td>
+                                    <td class="px-3 py-2">TCP / UDP</td>
+                                    <td class="px-3 py-2">Domain controller name resolution.</td>
+                                    <td class="px-3 py-2">Bi-directional</td>
+                                </tr>
+                                <tr class="border-b border-slate-200">
+                                    <td class="px-3 py-2 font-medium text-slate-800">Kerberos</td>
+                                    <td class="px-3 py-2">88</td>
+                                    <td class="px-3 py-2">TCP / UDP</td>
+                                    <td class="px-3 py-2">Authentication ticket exchange.</td>
+                                    <td class="px-3 py-2">Bi-directional</td>
+                                </tr>
+                                <tr class="border-b border-slate-200">
+                                    <td class="px-3 py-2 font-medium text-slate-800">Windows Time (W32Time)</td>
+                                    <td class="px-3 py-2">123</td>
+                                    <td class="px-3 py-2">UDP</td>
+                                    <td class="px-3 py-2">Time synchronization.</td>
+                                    <td class="px-3 py-2">Bi-directional</td>
+                                </tr>
+                                <tr class="border-b border-slate-200">
+                                    <td class="px-3 py-2 font-medium text-slate-800">RPC Endpoint Mapper</td>
+                                    <td class="px-3 py-2">135</td>
+                                    <td class="px-3 py-2">TCP</td>
+                                    <td class="px-3 py-2">RPC service discovery (replication, management).</td>
+                                    <td class="px-3 py-2">Bi-directional</td>
+                                </tr>
+                                <tr class="border-b border-slate-200">
+                                    <td class="px-3 py-2 font-medium text-slate-800">LDAP</td>
+                                    <td class="px-3 py-2">389</td>
+                                    <td class="px-3 py-2">TCP / UDP</td>
+                                    <td class="px-3 py-2">Directory queries and replication.</td>
+                                    <td class="px-3 py-2">Bi-directional</td>
+                                </tr>
+                                <tr class="border-b border-slate-200">
+                                    <td class="px-3 py-2 font-medium text-slate-800">SMB</td>
+                                    <td class="px-3 py-2">445</td>
+                                    <td class="px-3 py-2">TCP</td>
+                                    <td class="px-3 py-2">SYSVOL and NETLOGON replication.</td>
+                                    <td class="px-3 py-2">Bi-directional</td>
+                                </tr>
+                                <tr class="border-b border-slate-200">
+                                    <td class="px-3 py-2 font-medium text-slate-800">Kerberos Password Change</td>
+                                    <td class="px-3 py-2">464</td>
+                                    <td class="px-3 py-2">TCP / UDP</td>
+                                    <td class="px-3 py-2">Password resets and synchronization.</td>
+                                    <td class="px-3 py-2">Bi-directional</td>
+                                </tr>
+                                <tr class="border-b border-slate-200">
+                                    <td class="px-3 py-2 font-medium text-slate-800">LDAPS</td>
+                                    <td class="px-3 py-2">636</td>
+                                    <td class="px-3 py-2">TCP / UDP</td>
+                                    <td class="px-3 py-2">Secure LDAP queries/replication.</td>
+                                    <td class="px-3 py-2">Bi-directional</td>
+                                </tr>
+                                <tr class="border-b border-slate-200">
+                                    <td class="px-3 py-2 font-medium text-slate-800">Global Catalog</td>
+                                    <td class="px-3 py-2">3268</td>
+                                    <td class="px-3 py-2">TCP</td>
+                                    <td class="px-3 py-2">Forest-wide directory lookups.</td>
+                                    <td class="px-3 py-2">Bi-directional</td>
+                                </tr>
+                                <tr class="border-b border-slate-200">
+                                    <td class="px-3 py-2 font-medium text-slate-800">Global Catalog over SSL</td>
+                                    <td class="px-3 py-2">3269</td>
+                                    <td class="px-3 py-2">TCP</td>
+                                    <td class="px-3 py-2">Secure Global Catalog queries.</td>
+                                    <td class="px-3 py-2">Bi-directional</td>
+                                </tr>
+                                <tr class="border-b border-slate-200">
+                                    <td class="px-3 py-2 font-medium text-slate-800">Dynamic RPC</td>
+                                    <td class="px-3 py-2">49152-65535</td>
+                                    <td class="px-3 py-2">TCP / UDP</td>
+                                    <td class="px-3 py-2">Dynamically assigned RPC workloads.</td>
+                                    <td class="px-3 py-2">Bi-directional</td>
+                                </tr>
+                                <tr class="border-b border-slate-200">
+                                    <td class="px-3 py-2 font-medium text-slate-800">PowerShell Remoting</td>
+                                    <td class="px-3 py-2">5985 / 5986</td>
+                                    <td class="px-3 py-2">TCP</td>
+                                    <td class="px-3 py-2">Automation & Desired State Configuration.</td>
+                                    <td class="px-3 py-2">Bi-directional</td>
+                                </tr>
+                                <tr class="border-b border-slate-200">
+                                    <td class="px-3 py-2 font-medium text-slate-800">DFS-R (SYSVOL Replication)</td>
+                                    <td class="px-3 py-2">5722</td>
+                                    <td class="px-3 py-2">TCP</td>
+                                    <td class="px-3 py-2">SYSVOL replication using DFS-R.</td>
+                                    <td class="px-3 py-2">Bi-directional</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>`,
                 commands: []
             },
             {
@@ -367,11 +508,13 @@
 
             qaData.forEach((item, index) => {
                 const id = `qa-${index + 1}`;
+                const questionNumber = index + 1;
+                const questionText = item.q.replace(/^\d+\.\s*/, '');
 
                 const navItem = document.createElement('li');
                 const navAnchor = document.createElement('a');
                 navAnchor.href = `#${id}`;
-                navAnchor.textContent = item.q;
+                navAnchor.textContent = `${questionNumber}. ${questionText}`;
                 navAnchor.className = 'nav-link block px-4 py-2.5 rounded-lg text-sm';
                 navItem.appendChild(navAnchor);
                 navList.appendChild(navItem);
@@ -382,7 +525,7 @@
 
                 const header = document.createElement('div');
                 header.className = 'flex items-center mb-3';
-                header.innerHTML = `<span class="question-number">${index + 1}</span><h2 class="text-xl md:text-2xl font-bold text-slate-800">${item.q}</h2>`;
+                header.innerHTML = `<span class="question-number">${questionNumber}</span><h2 class="text-xl md:text-2xl font-bold text-slate-800">${questionText}</h2>`;
                 section.appendChild(header);
 
                 const answer = document.createElement('p');
