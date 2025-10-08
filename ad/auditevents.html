@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows Audit Event ID Reference Dashboard</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar styling for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; /* slate-300 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; /* slate-400 */
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans min-h-screen p-2 md:p-6">
+
+    <div id="app" class="max-w-7xl mx-auto">
+        
+        <!-- Header -->
+        <header class="text-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-blue-800 mb-1">
+                Windows Account Audit Events
+            </h1>
+            <p class="text-lg text-gray-600">Interactive Reference Dashboard</p>
+        </header>
+
+        <!-- Search Bar and Controls -->
+        <div class="bg-white p-4 md:p-6 rounded-xl shadow-lg mb-4 sticky top-0 z-10 border-b border-gray-200">
+            <input 
+                type="text" 
+                id="search-input" 
+                placeholder="Search by ID or Description (e.g., '4720' or 'user created')" 
+                class="w-full p-3 md:p-4 border border-gray-300 rounded-lg text-base md:text-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150"
+                onkeyup="filterEvents()"
+            >
+
+            <div id="category-filters" class="mt-4 flex flex-wrap gap-2 justify-center">
+                <!-- Filters will be generated here by JS -->
+            </div>
+        </div>
+
+        <!-- Results Display -->
+        <div id="results-container" class="space-y-2">
+            <!-- Event cards will be dynamically inserted here -->
+        </div>
+
+        <!-- No Results Message -->
+        <div id="no-results" class="hidden text-center p-8 bg-yellow-100 border border-yellow-300 rounded-lg shadow-md mt-10">
+            <p class="text-xl font-semibold text-yellow-800">No events found matching your criteria.</p>
+            <p class="text-gray-600 mt-2">Try clearing your search or selecting 'All Categories'.</p>
+        </div>
+
+    </div>
+
+    <script>
+        // --- 1. Data Definition ---
+        const ALL_EVENTS = [
+            { id: 4720, category: "User Account", description: "A user account was created" },
+            { id: 4722, category: "User Account", description: "A user account was enabled" },
+            { id: 4723, category: "User Account", description: "An attempt was made to change an account's password" },
+            { id: 4724, category: "User Account", description: "An attempt was made to reset an accounts password" },
+            { id: 4725, category: "User Account", description: "A user account was disabled" },
+            { id: 4726, category: "User Account", description: "A user account was deleted" },
+            { id: 4738, category: "User Account", description: "A user account was changed" },
+            { id: 4740, category: "User Account", description: "A user account was locked out" },
+            { id: 4767, category: "User Account", description: "A user account was unlocked" },
+            { id: 4781, category: "User Account", description: "The name of an account was changed" },
+            { id: 4782, category: "User Account", description: "The password hash an account was accessed" },
+            { id: 4797, category: "User Account", description: "An attempt was made to query the existence of a blank password for an account" },
+            { id: 4798, category: "User Account", description: "A user's local group membership was enumerated." },
+
+            { id: 4727, category: "Security Group (Global)", description: "A security-enabled global group was created" },
+            { id: 4728, category: "Security Group (Global)", description: "A member was added to a security-enabled global group" },
+            { id: 4729, category: "Security Group (Global)", description: "A member was removed from a security-enabled global group" },
+            { id: 4730, category: "Security Group (Global)", description: "A security-enabled global group was deleted" },
+            { id: 4737, category: "Security Group (Global)", description: "A security-enabled global group was changed" },
+            
+            { id: 4731, category: "Security Group (Local)", description: "A security-enabled local group was created" },
+            { id: 4732, category: "Security Group (Local)", description: "A member was added to a security-enabled local group" },
+            { id: 4733, category: "Security Group (Local)", description: "A member was removed from a security-enabled local group" },
+            { id: 4734, category: "Security Group (Local)", description: "A security-enabled local group was deleted" },
+            { id: 4735, category: "Security Group (Local)", description: "A security-enabled local group was changed" },
+            { id: 4799, category: "Security Group (Local)", description: "A security-enabled local group membership was enumerated" },
+
+            { id: 4754, category: "Security Group (Universal)", description: "A security-enabled universal group was created" },
+            { id: 4755, category: "Security Group (Universal)", description: "A security-enabled universal group was changed" },
+            { id: 4756, category: "Security Group (Universal)", description: "A member was added to a security-enabled universal group" },
+            { id: 4757, category: "Security Group (Universal)", description: "A member was removed from a security-enabled universal group" },
+            { id: 4758, category: "Security Group (Universal)", description: "A security-enabled universal group was deleted" },
+
+            { id: 4744, category: "Distribution Group (Local)", description: "A security-disabled local group was created" },
+            { id: 4745, category: "Distribution Group (Local)", description: "A security-disabled local group was changed" },
+            { id: 4746, category: "Distribution Group (Local)", description: "A member was added to a security-disabled local group" },
+            { id: 4747, category: "Distribution Group (Local)", description: "A member was removed from a security-disabled local group" },
+            { id: 4748, category: "Distribution Group (Local)", description: "A security-disabled local group was deleted" },
+            
+            { id: 4749, category: "Distribution Group (Global)", description: "A security-disabled global group was created" },
+            { id: 4750, category: "Distribution Group (Global)", description: "A security-disabled global group was changed" },
+            { id: 4751, category: "Distribution Group (Global)", description: "A member was added to a security-disabled global group" },
+            { id: 4752, category: "Distribution Group (Global)", description: "A member was removed from a security-disabled global group" },
+            { id: 4753, category: "Distribution Group (Global)", description: "A security-disabled global group was deleted" },
+
+            { id: 4759, category: "Distribution Group (Universal)", description: "A security-disabled universal group was created" },
+            { id: 4760, category: "Distribution Group (Universal)", description: "A security-disabled universal group was changed" },
+            { id: 4761, category: "Distribution Group (Universal)", description: "A member was added to a security-disabled universal group" },
+            { id: 4762, category: "Distribution Group (Universal)", description: "A member was removed from a security-disabled universal group" },
+            { id: 4763, category: "Distribution Group (Universal)", description: "A security-disabled universal group was deleted" },
+
+            { id: 4741, category: "Computer Account", description: "A computer account was created" },
+            { id: 4742, category: "Computer Account", description: "A computer account was changed" },
+            { id: 4743, category: "Computer Account", description: "A computer account was deleted" },
+
+            { id: 4739, category: "System/Policy/Other", description: "Domain Policy was changed" },
+            { id: 4764, category: "System/Policy/Other", description: "A group's type was changed" },
+            { id: 4765, category: "System/Policy/Other", description: "SID History was added to an account" },
+            { id: 4766, category: "System/Policy/Other", description: "An attempt to add SID History to an account failed" },
+            { id: 4780, category: "System/Policy/Other", description: "The ACL was set on accounts which are members of administrators groups" },
+            { id: 4783, category: "Application Group", description: "A basic application group was created" },
+            { id: 4784, category: "Application Group", description: "A basic application group was changed" },
+            { id: 4785, category: "Application Group", description: "A member was added to a basic application group" },
+            { id: 4786, category: "Application Group", description: "A member was removed from a basic application group" },
+            { id: 4787, category: "Application Group", description: "A non-member was added to a basic application group" },
+            { id: 4788, category: "Application Group", description: "A non-member was removed from a basic application group" },
+            { id: 4789, category: "Application Group", description: "A basic application group was deleted" },
+            { id: 4790, category: "Application Group", description: "An LDAP query group was created" },
+            { id: 4791, category: "Application Group", description: "A basic application group was changed" }, // Duplicated ID 4784/4791 based on list structure
+            { id: 4792, category: "Application Group", description: "An LDAP query group was deleted" },
+            { id: 4793, category: "System/Policy/Other", description: "The Password Policy Checking API was called" },
+            { id: 4794, category: "System/Policy/Other", description: "An attempt was made to set the Directory Services Restore Mode administrator password" },
+            { id: 5376, category: "System/Policy/Other", description: "Credential Manager credentials were backed up" },
+            { id: 5377, category: "System/Policy/Other", description: "Credential Manager credentials were restored from a backup" },
+        ].sort((a, b) => a.id - b.id); // Sort by ID numerically
+
+        // --- 2. State Management ---
+        let selectedCategory = 'All Categories';
+
+        // --- 3. Utility Functions ---
+
+        // Maps category name to a Tailwind color class
+        const categoryColors = {
+            "User Account": "bg-blue-500",
+            "Security Group (Global)": "bg-green-500",
+            "Security Group (Local)": "bg-green-400",
+            "Security Group (Universal)": "bg-green-600",
+            "Distribution Group (Local)": "bg-purple-400",
+            "Distribution Group (Global)": "bg-purple-500",
+            "Distribution Group (Universal)": "bg-purple-600",
+            "Computer Account": "bg-red-500",
+            "Application Group": "bg-yellow-500",
+            "System/Policy/Other": "bg-gray-500"
+        };
+        
+        // --- 4. Core Rendering Logic ---
+
+        /**
+         * Renders the event cards into the container.
+         * @param {Array<Object>} events - The filtered list of events to display.
+         */
+        function renderEvents(events) {
+            const container = document.getElementById('results-container');
+            const noResults = document.getElementById('no-results');
+            container.innerHTML = '';
+
+            if (events.length === 0) {
+                noResults.classList.remove('hidden');
+                return;
+            }
+            noResults.classList.add('hidden');
+
+            events.forEach(event => {
+                const colorClass = categoryColors[event.category] || 'bg-gray-700';
+                
+                // Using CSS Grid for a compact, aligned row layout on desktop, 
+                // and a slightly optimized stack on mobile.
+                const eventCard = `
+                    <div class="grid grid-cols-12 gap-3 bg-white p-3 md:p-4 rounded-lg shadow-sm hover:shadow-md transition duration-200 items-center border border-gray-100">
+                        <!-- Event ID (Fixed width on desktop, takes up 1/4 on mobile) -->
+                        <div class="col-span-3 sm:col-span-2 lg:col-span-1">
+                            <span class="text-xl md:text-2xl font-bold text-blue-700 block">${event.id}</span>
+                        </div>
+                        
+                        <!-- Description (Takes up most space) -->
+                        <div class="col-span-9 sm:col-span-7 lg:col-span-7">
+                            <p class="text-sm md:text-base text-gray-800">${event.description}</p>
+                        </div>
+                        
+                        <!-- Category Tag (Drops to next line on smaller mobile screens, aligned right on larger screens) -->
+                        <div class="col-span-12 lg:col-span-4 flex justify-start lg:justify-end mt-2 lg:mt-0">
+                            <span class="inline-block px-3 py-1 text-xs font-medium text-white rounded-full ${colorClass} shadow-sm">
+                                ${event.category}
+                            </span>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += eventCard;
+            });
+        }
+
+        /**
+         * Handles the search input and category filtering.
+         */
+        function filterEvents() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
+            
+            let filtered = ALL_EVENTS.filter(event => {
+                const matchesSearch = String(event.id).includes(searchTerm) || event.description.toLowerCase().includes(searchTerm);
+                
+                const matchesCategory = selectedCategory === 'All Categories' || event.category === selectedCategory;
+
+                return matchesSearch && matchesCategory;
+            });
+
+            renderEvents(filtered);
+        }
+        
+        // --- 5. Filter Button Logic ---
+
+        /**
+         * Generates the category filter buttons.
+         */
+        function generateFilters() {
+            const categories = new Set(ALL_EVENTS.map(e => e.category));
+            const filterContainer = document.getElementById('category-filters');
+            
+            // Add 'All Categories' button
+            const allButton = createFilterButton('All Categories', true);
+            filterContainer.appendChild(allButton);
+
+            // Add specific category buttons
+            categories.forEach(category => {
+                const button = createFilterButton(category, false);
+                filterContainer.appendChild(button);
+            });
+        }
+
+        /**
+         * Creates a single category button element.
+         */
+        function createFilterButton(categoryName, isAll) {
+            const button = document.createElement('button');
+            const baseClasses = "px-3 py-1.5 rounded-full font-medium text-xs transition duration-150 ease-in-out whitespace-nowrap shadow-sm hover:shadow-md";
+
+            const activeClasses = isAll 
+                ? "bg-blue-600 text-white" 
+                : (categoryColors[categoryName] ? `${categoryColors[categoryName]} text-white` : 'bg-gray-600 text-white');
+
+            const inactiveClasses = "bg-gray-200 text-gray-700 hover:bg-gray-300";
+
+            button.className = (isAll || categoryName === selectedCategory) ? `${baseClasses} ${activeClasses}` : `${baseClasses} ${inactiveClasses}`;
+            button.textContent = categoryName;
+            button.onclick = () => handleFilterClick(categoryName, button);
+
+            button.setAttribute('data-category', categoryName);
+
+            return button;
+        }
+
+        /**
+         * Handles the click event for a category button.
+         */
+        function handleFilterClick(categoryName) {
+            // Update state
+            const newCategory = selectedCategory === categoryName && categoryName !== 'All Categories' ? 'All Categories' : categoryName;
+            selectedCategory = newCategory;
+            
+            // Re-render buttons (to update active state)
+            updateFilterButtons();
+
+            // Re-filter and render results
+            filterEvents();
+        }
+
+        /**
+         * Updates the visual appearance of all filter buttons based on the current state.
+         */
+        function updateFilterButtons() {
+            const filterContainer = document.getElementById('category-filters');
+            filterContainer.querySelectorAll('button').forEach(button => {
+                const category = button.getAttribute('data-category');
+                const baseClasses = "px-3 py-1.5 rounded-full font-medium text-xs transition duration-150 ease-in-out whitespace-nowrap shadow-sm hover:shadow-md";
+                
+                const isAll = category === 'All Categories';
+                const isActive = selectedCategory === category;
+
+                const activeClasses = isAll 
+                    ? "bg-blue-600 text-white" 
+                    : (categoryColors[category] ? `${categoryColors[category]} text-white` : 'bg-gray-600 text-white');
+                
+                const inactiveClasses = "bg-gray-200 text-gray-700 hover:bg-gray-300";
+
+                button.className = isActive ? `${baseClasses} ${activeClasses}` : `${baseClasses} ${inactiveClasses}`;
+            });
+        }
+
+
+        // --- 6. Initialization ---
+        window.onload = function() {
+            generateFilters();
+            filterEvents(); // Initial render
+        };
+
+    </script>
+</body>
+</html>
