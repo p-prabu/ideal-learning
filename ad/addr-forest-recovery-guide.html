@@ -73,6 +73,24 @@
         .phase-step-circle:hover {
             transform: scale(1.1);
         }
+        @media (max-width: 767px) {
+            #sidebar {
+                position: static;
+                height: auto;
+                background: transparent;
+                border: none;
+                padding: 0 1.5rem 1.5rem;
+            }
+            #sidebar h1, #sidebar p {
+                text-align: center;
+            }
+            #sidebar ul {
+                display: none;
+            }
+            #sidebar .recovery-progress {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -90,7 +108,7 @@
                 <li><a href="#phase-6" class="sidebar-link flex items-center px-4 py-2.5 text-slate-600 hover:bg-slate-200/60 rounded-lg transition-colors duration-200 text-sm font-medium">6. Validation</a></li>
             </ul>
 
-            <div class="mt-12">
+            <div class="mt-12 recovery-progress">
                 <h3 class="text-sm font-semibold text-slate-600 mb-3 uppercase tracking-wider">Recovery Progress</h3>
                 <div class="w-full bg-slate-200 rounded-full h-2.5">
                     <div id="progress-bar" class="progress-bar-gradient h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
