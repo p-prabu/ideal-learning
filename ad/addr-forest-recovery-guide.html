@@ -100,8 +100,21 @@
         </nav>
 
         <main class="flex-1 p-6 md:p-12 bg-slate-50/50">
+            <div class="md:hidden mb-8 bg-white/90 border border-slate-200 rounded-xl p-4 shadow-sm">
+                <label for="mobile-phase-select" class="block text-sm font-semibold text-slate-700 mb-2">Jump to phase</label>
+                <select id="mobile-phase-select" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-sky-500 focus:ring focus:ring-sky-200/80">
+                    <option value="" disabled selected>Select a phase</option>
+                </select>
+            </div>
             <div id="phase-0" class="mb-16">
                 <h2 class="text-4xl font-bold text-slate-800 mb-4 font-poppins">Active Directory Forest Recovery</h2>
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6 text-sm text-amber-900">
+                    <h3 class="font-semibold text-amber-800 mb-2 uppercase tracking-wide">Disclaimer</h3>
+                    <p class="mb-2"><strong>DNS services must be configured for your environment.</strong> This guide references BIND in places, but many organisations rely on Microsoft DNS or other providers. Adjust the recovery steps so that name resolution is restored using the platform you operate.</p>
+                    <p class="mb-2"><strong>Phase 5 (Reintegration) and all verification tests are environment-specific.</strong> Validate prerequisites, lab test each action, and update the runbook to reflect how your production forest behaves.</p>
+                    <p class="mb-2"><strong>Use this material as guidance only.</strong> If a step does not fit your topology or a dependency is broken, document the alternative that works in your environment before relying on it in a crisis.</p>
+                    <p class="mb-0">By continuing you acknowledge that you have reviewed the recovery plan, understand the risks, and will execute the procedure at your own discretion.</p>
+                </div>
                 <p class="text-slate-600 max-w-4xl mb-10 text-base leading-relaxed">This interactive guide provides a structured walkthrough of the forest recovery process. The procedure is broken down into distinct phases, from initial preparation to final validation. Use the navigation on the left to jump between phases, and interact with each task to see detailed explanations and relevant PowerShell commands. Mark tasks as complete to track your progress.</p>
                 <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
                     <h3 class="text-xl font-bold mb-6 text-slate-700 font-poppins">Recovery Phases Overview</h3>
@@ -148,13 +161,13 @@
                 tasks: [
                     {
                         title: "Verify the latest backup",
-                        details: "Confirm you have a recent, valid System State or Full Server backup of a Domain Controller. The backup should be from before the disaster event. Document the backup date and location.",
+                        details: "Confirm you have a recent, valid System State or Full Server backup of a Domain Controller. The backup should be from before the disaster event. Document the backup date and location.<br><span class='text-amber-600 font-semibold'>Note:</span> Your environment may use a different backup platform or vendor—confirm restore procedures, retention targets, and SLAs with the backup team.",
                         powershell: "Get-WBJob -Last 1",
                         verification: "Check the output for a 'Successful' status and verify the 'StartTime' is within your RPO (Recovery Point Objective)."
                     },
                     {
                         title: "Get the passwords ready",
-                        details: "Ensure you have the Directory Services Restore Mode (DSRM) password for the DC being restored, as well as Domain Admin credentials. If these are unknown, they can be reset on another DC if one is available.",
+                        details: "Ensure you have the Directory Services Restore Mode (DSRM) password for the DC being restored, as well as Domain Admin credentials. If these are unknown, they can be reset on another DC if one is available.<br><span class='text-amber-600 font-semibold'>Note:</span> Store credentials in a secure vault or controlled physical location and coordinate with the AD team or service owner to confirm access.",
                         powershell: "# No direct command. This is a procedural step.\n# Ensure passwords are documented in a secure location.",
                         verification: "Physically or digitally confirm access to the required passwords."
                     },
@@ -166,9 +179,9 @@
                     },
                     {
                         title: "Copy AD Backup to LAB VM",
-                        details: "Transfer the AD backup files to the newly created lab VM. You can use an additional virtual disk (VMDK) or a network share that is accessible only from the isolated lab network.",
+                        details: "Transfer the AD backup files to the newly created lab VM. You can use an additional virtual disk (VMDK) or a network share that is accessible only from the isolated lab network.<br><span class='text-amber-600 font-semibold'>Note:</span> Modern backup tools often restore directly from the appliance, SMB path, or cloud target—test those workflows ahead of time.",
                         powershell: `Copy-Item -Path "Z:\\DC-Backups\\WindowsImageBackup" -Destination "E:\\Restore" -Recurse`,
-                        verification: "Confirm the 'WindowsImageBackup' folder is present and intact on the lab VM."
+                        verification: "Confirm the 'WindowsImageBackup' folder is present and intact on the lab VM. If you must mount the backup over the network, configure temporary IP settings and routes in the lab to reach the share without exposing production traffic."
                     },
                     {
                         title: "Operating System ISO attached to VM",
@@ -222,7 +235,7 @@
                     },
                     {
                         title: "Install and Configure DNS Role",
-                        details: "Since your production DNS is on Infoblox, the restored DC needs a temporary, local DNS server to function. Install the DNS Server role and configure a forward lookup zone for your AD domain.",
+                        details: "Since your production DNS is on BIND, the restored DC needs a temporary, local DNS server to function. Install the DNS Server role and configure a forward lookup zone for your AD domain.",
                         powershell: "Install-WindowsFeature -Name DNS -IncludeManagementTools\nAdd-DnsServerPrimaryZone -Name 'yourdomain.local' -ReplicationScope 'Forest' -PassThru",
                         verification: "Run `Get-WindowsFeature -Name DNS`. The 'Install State' should be 'Installed'."
                     },
@@ -316,7 +329,7 @@
             {
                 phase: 5,
                 title: "Reintegration (Actual Scenario)",
-                description: "These steps apply when moving from the isolated lab to a live production environment. They focus on security hardening, integrating with production services like Infoblox, and preparing for forest expansion.",
+                description: "These steps apply when moving from the isolated lab to a live production environment. They focus on security hardening, integrating with production services like BIND, and preparing for forest expansion.",
                 tasks: [
                     {
                         title: "Enable restored DC as Global Catalog (GC)",
@@ -350,31 +363,31 @@
                     },
                     {
                         title: "STOP MS-DNS service",
-                        details: "Stop the temporary Microsoft DNS service on the DC, as the authoritative DNS for the production network is Infoblox.",
+                        details: "Stop the temporary Microsoft DNS service on the DC, as the authoritative DNS for the production network is BIND.",
                         powershell: "Stop-Service DNS",
                         verification: "Run `Get-Service DNS`. Status should be 'Stopped'."
                     },
                     {
-                        title: "Clean SRV records from INFOBLOX",
-                        details: "Manually remove all AD-related SRV records from the Infoblox DNS zones. This clears out any stale data before the newly restored DC registers itself.",
-                        powershell: "# This is a manual step performed in the Infoblox management interface.",
-                        verification: "A query for AD SRV records (e.g., _ldap._tcp.yourdomain.local) against Infoblox returns no results."
+                        title: "Clean SRV records from BIND DNS",
+                        details: "Manually remove all AD-related SRV records from the BIND DNS zones. This clears out any stale data before the newly restored DC registers itself.",
+                        powershell: "# This is a manual step performed in the BIND management interface.",
+                        verification: "A query for AD SRV records (e.g., _ldap._tcp.yourdomain.local) against BIND returns no results."
                     },
                     {
-                        title: "Enable network connection to INFOBLOX",
-                        details: "Change the VM's network adapter from the isolated network to the production network. Update its DNS client settings to point to Infoblox servers.",
-                        powershell: `Set-DnsClientServerAddress -InterfaceIndex (Get-NetAdapter).ifIndex -ServerAddresses "INFOBLOX_IP_1", "INFOBLOX_IP_2"`,
-                        verification: "The DC can ping other production resources and the Infoblox servers."
+                        title: "Enable network connection to BIND",
+                        details: "Change the VM's network adapter from the isolated network to the production network. Update its DNS client settings to point to BIND servers.",
+                        powershell: `Set-DnsClientServerAddress -InterfaceIndex (Get-NetAdapter).ifIndex -ServerAddresses "BIND_IP_1", "BIND_IP_2"`,
+                        verification: "The DC can ping other production resources and the BIND servers."
                     },
                     {
                         title: "Reboot DC and Verify DNS Registration",
-                        details: "Reboot the domain controller. After it comes back online, verify that it has correctly registered its HOST (A) and SRV records in Infoblox.",
+                        details: "Reboot the domain controller. After it comes back online, verify that it has correctly registered its HOST (A) and SRV records in BIND.",
                         powershell: "Restart-Computer -Force",
-                        verification: "Check Infoblox to see the DC's A record and the full suite of AD SRV records have been dynamically registered."
+                        verification: "Check BIND to see the DC's A record and the full suite of AD SRV records have been dynamically registered."
                     },
                     {
                         title: "Remove MS-DNS role",
-                        details: "Once you have confirmed that AD is functioning correctly with Infoblox, you can fully remove the DNS role from the restored domain controller.",
+                        details: "Once you have confirmed that AD is functioning correctly with BIND, you can fully remove the DNS role from the restored domain controller.",
                         powershell: `Uninstall-WindowsFeature -Name DNS -IncludeManagementTools`,
                         verification: "Run `Get-WindowsFeature DNS`. The 'Install State' is 'Available' (not 'Installed')."
                     }
@@ -512,6 +525,27 @@
             
             const sections = document.querySelectorAll('main section');
             const navLinks = document.querySelectorAll('#nav-links a');
+            const mobilePhaseSelect = document.getElementById('mobile-phase-select');
+
+            if (mobilePhaseSelect) {
+                navLinks.forEach(link => {
+                    const option = document.createElement('option');
+                    const href = link.getAttribute('href');
+                    option.value = href;
+                    option.textContent = link.textContent;
+                    mobilePhaseSelect.appendChild(option);
+                });
+                mobilePhaseSelect.value = '#phase-0';
+                mobilePhaseSelect.addEventListener('change', (event) => {
+                    const target = event.target.value;
+                    if (target) {
+                        const section = document.querySelector(target);
+                        if (section) {
+                            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }
+                });
+            }
 
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
@@ -522,6 +556,9 @@
                                 link.classList.add('active');
                             }
                         });
+                        if (mobilePhaseSelect) {
+                            mobilePhaseSelect.value = `#${entry.target.id}`;
+                        }
                     }
                 });
             }, { rootMargin: "-40% 0px -60% 0px" });
@@ -535,6 +572,9 @@
                 if(entries[0].isIntersecting){
                     navLinks.forEach(link => link.classList.remove('active'));
                     document.querySelector('a[href="#phase-0"]').classList.add('active');
+                    if (mobilePhaseSelect) {
+                        mobilePhaseSelect.value = '#phase-0';
+                    }
                 }
             }, {threshold: 0.1});
             overviewObserver.observe(overviewSection);
